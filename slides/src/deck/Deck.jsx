@@ -7,17 +7,28 @@ import {
   useState,
 } from "react";
 import { buildSlides } from "../slides/index.jsx";
-import { fbEnabled, setSessionState, resetAllResponses } from "../firebase.js";
+import {
+  fbEnabled,
+  setSessionState,
+  subscribeSession,
+  resetAllResponses,
+} from "../firebase.js";
 
 const STAGE_W = 1280;
 const STAGE_H = 720;
+const SLIDE_KEY = "deck.slideIndex";
 
 const DeckContext = createContext(null);
 export const useDeck = () => useContext(DeckContext);
 
 export default function Deck() {
   const slides = useMemo(() => buildSlides(), []);
-  const [index, setIndex] = useState(0);
+  // 발표 중 새로고침해도 보던 슬라이드로 돌아온다
+  const [index, setIndex] = useState(() => {
+    const saved = Number(sessionStorage.getItem(SLIDE_KEY));
+    const last = buildSlides().length - 1;
+    return Number.isInteger(saved) ? Math.max(0, Math.min(saved, last)) : 0;
+  });
   const [overview, setOverview] = useState(false);
   const [jumpBuffer, setJumpBuffer] = useState("");
   const [quizRevealed, setQuizRevealed] = useState(false);
@@ -42,16 +53,35 @@ export default function Deck() {
   };
 
   // 발표자 슬라이드 진입 시 /live 인터랙션 자동 활성화
+  const hasActivated = useRef(false);
   useEffect(() => {
     const s = slides[index];
     setQuizRevealed(false);
-    if (fbEnabled) {
-      setSessionState({
-        active: s.interaction ?? null,
-        ...(s.interaction === "quiz" ? { quizRevealed: false } : {}),
-      });
-    }
+    sessionStorage.setItem(SLIDE_KEY, String(index));
+    if (!fbEnabled) return;
+
+    // 아직 인터랙션을 한 번도 연 적 없는 덱은 남이 진행 중인 인터랙션을 끄지 않는다.
+    // 20번 슬라이드 QR로 청중이 발표자 화면을 열거나 창을 하나 더 띄우는 경우가 여기 해당한다.
+    const next = s.interaction ?? null;
+    if (next === null && !hasActivated.current) return;
+    if (next !== null) hasActivated.current = true;
+
+    setSessionState({
+      active: next,
+      ...(next === "quiz" ? { quizRevealed: false } : {}),
+    });
   }, [index, slides]);
+
+  // 세션이 현재 슬라이드와 어긋나면 발표자 덱이 다시 맞춘다.
+  // 다른 창이 덮어썼거나 쓰기가 한 번 실패했을 때 /live가 멈춰 있지 않도록 하는 안전장치.
+  useEffect(() => {
+    if (!fbEnabled) return;
+    return subscribeSession((s) => {
+      if (!hasActivated.current) return;
+      const expected = slides[indexRef.current].interaction ?? null;
+      if (s.active !== expected) setSessionState({ active: expected });
+    });
+  }, [slides]);
 
   const revealQuiz = () => {
     setQuizRevealed(true);
