@@ -12,7 +12,8 @@ import { QUIZ_OPTIONS, QUIZ_ANSWER_INDEX } from "../config.js";
 // 청중용 참여 페이지 — 모바일 우선, 넓은 화면에서는 중앙 카드(최대 640px)
 export default function LiveApp() {
   const [session, setSession] = useState({});
-  useEffect(() => subscribeSession(setSession), []);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => subscribeSession(setSession, () => setFailed(true)), []);
 
   return (
     <div className="min-h-full bg-paper text-ink">
@@ -26,7 +27,7 @@ export default function LiveApp() {
           </h1>
         </header>
         <main className="flex flex-1 flex-col justify-center pb-10">
-          {!fbEnabled ? (
+          {!fbEnabled || failed ? (
             <Waiting text="참여 기능이 아직 열리지 않았습니다" />
           ) : session.active === "poll" ? (
             <Poll />

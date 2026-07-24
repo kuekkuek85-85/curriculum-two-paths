@@ -139,7 +139,15 @@ export function S14() {
 export function S14B() {
   const { quizRevealed } = useDeck();
   const [counts, setCounts] = useState(QUIZ_OPTIONS.map(() => 0));
-  useEffect(() => subscribeCounts("quiz", QUIZ_OPTIONS.length, setCounts), []);
+  const [failed, setFailed] = useState(false);
+  useEffect(
+    () =>
+      subscribeCounts("quiz", QUIZ_OPTIONS.length, setCounts, () =>
+        setFailed(true)
+      ),
+    []
+  );
+  const live = fbEnabled && !failed;
   const total = counts.reduce((a, b) => a + b, 0);
   const max = Math.max(1, ...counts);
 
@@ -151,7 +159,7 @@ export function S14B() {
           <br />
           1차시 학습 지원 자료 하나를 만드는 데 걸린 시간은?
         </h2>
-        {fbEnabled ? (
+        {live ? (
           <div className="tabular mt-2 text-[17px] text-dim">
             응답 {total}명 {!quizRevealed && <span className="ml-3">R = 정답 공개</span>}
           </div>
@@ -180,7 +188,7 @@ export function S14B() {
                       </span>
                     )}
                   </span>
-                  {fbEnabled && (
+                  {live && (
                     <span className="tabular text-[19px] font-bold text-seal">
                       {counts[i]}표
                     </span>

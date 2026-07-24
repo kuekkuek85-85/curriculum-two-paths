@@ -49,9 +49,16 @@ export async function setSessionState(state) {
   }
 }
 
-export function subscribeSession(cb) {
+export function subscribeSession(cb, onError) {
   if (!db) return () => {};
-  return onSnapshot(doc(db, ...SESSION), (snap) => cb(snap.data() ?? {}));
+  return onSnapshot(
+    doc(db, ...SESSION),
+    (snap) => cb(snap.data() ?? {}),
+    (e) => {
+      console.warn("session 구독 실패:", e);
+      onError?.(e);
+    }
+  );
 }
 
 // 청중: 폴/퀴즈 응답 제출 (choice: 0|1|2)
@@ -61,16 +68,23 @@ export async function submitChoice(kind, choice) {
 }
 
 // 발표자: 폴/퀴즈 응답 실시간 집계 (cb에 [n0, n1, n2] 전달)
-export function subscribeCounts(kind, numOptions, cb) {
+export function subscribeCounts(kind, numOptions, cb, onError) {
   if (!db) return () => {};
-  return onSnapshot(collection(db, COLLECTIONS[kind]), (snap) => {
-    const counts = Array(numOptions).fill(0);
-    snap.forEach((d) => {
-      const c = d.data().choice;
-      if (c >= 0 && c < numOptions) counts[c]++;
-    });
-    cb(counts);
-  });
+  return onSnapshot(
+    collection(db, COLLECTIONS[kind]),
+    (snap) => {
+      const counts = Array(numOptions).fill(0);
+      snap.forEach((d) => {
+        const c = d.data().choice;
+        if (c >= 0 && c < numOptions) counts[c]++;
+      });
+      cb(counts);
+    },
+    (e) => {
+      console.warn(`${kind} 집계 구독 실패:`, e);
+      onError?.(e);
+    }
+  );
 }
 
 // 청중: 자유 입력 제출 (S19)
@@ -84,12 +98,17 @@ export async function submitWish(text) {
 }
 
 // 발표자: 자유 입력 실시간 구독 (최신이 위)
-export function subscribeWishes(cb) {
+export function subscribeWishes(cb, onError) {
   if (!db) return () => {};
   const q = query(collection(db, COLLECTIONS.wish), orderBy("ts", "desc"));
-  return onSnapshot(q, (snap) => {
-    cb(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-  });
+  return onSnapshot(
+    q,
+    (snap) => cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+    (e) => {
+      console.warn("자유 입력 구독 실패:", e);
+      onError?.(e);
+    }
+  );
 }
 
 // 발표자: 부적절 입력 숨김 처리

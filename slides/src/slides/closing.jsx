@@ -51,7 +51,9 @@ export const WISH_PROMPT =
 // S19 — [인터랙션 ③] 실습 예고: 자유 입력
 export function S19() {
   const [wishes, setWishes] = useState([]);
-  useEffect(() => subscribeWishes(setWishes), []);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => subscribeWishes(setWishes, () => setFailed(true)), []);
+  const live = fbEnabled && !failed;
   const visible = wishes.filter((w) => !w.hidden);
 
   return (
@@ -66,7 +68,7 @@ export function S19() {
               3~4교시 · 디지털 기반 과목 개발 실습 4·5 — 교수학습과 평가 개발
             </p>
           </div>
-          {fbEnabled && (
+          {live && (
             <span className="tabular text-[16px] text-dim">
               입력 {visible.length}건 · 카드 클릭 = 숨김
             </span>
@@ -75,7 +77,7 @@ export function S19() {
         <p className="mt-4 rounded-lg border border-line bg-white px-5 py-3 text-[19px] font-semibold text-seal">
           {WISH_PROMPT}
         </p>
-        {!fbEnabled && <OfflineHint />}
+        {!live && <OfflineHint />}
         <div className="mt-4 grid min-h-0 flex-1 auto-rows-min grid-cols-3 gap-3 overflow-hidden">
           {visible.slice(0, 12).map((w) => (
             <button
@@ -89,7 +91,7 @@ export function S19() {
               {w.text}
             </button>
           ))}
-          {fbEnabled && visible.length === 0 && (
+          {live && visible.length === 0 && (
             <div className="col-span-3 flex items-center justify-center text-[19px] text-dim">
               입력을 기다리는 중…
             </div>

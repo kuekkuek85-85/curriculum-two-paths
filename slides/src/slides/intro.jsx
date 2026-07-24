@@ -81,7 +81,12 @@ export const POLL_OPTIONS = [
 // S2-B — [인터랙션 ①] 실시간 폴
 export function S2B() {
   const [counts, setCounts] = useState([0, 0, 0]);
-  useEffect(() => subscribeCounts("poll", 3, setCounts), []);
+  const [failed, setFailed] = useState(false);
+  useEffect(
+    () => subscribeCounts("poll", 3, setCounts, () => setFailed(true)),
+    []
+  );
+  const live = fbEnabled && !failed;
   const total = counts.reduce((a, b) => a + b, 0);
   const max = Math.max(1, ...counts);
 
@@ -91,7 +96,7 @@ export function S2B() {
         <h2 className="text-[34px] font-extrabold leading-snug tracking-tight">
           지금 개발 중인 내 과목, 완성되고 나면 — 지원자료는?
         </h2>
-        {fbEnabled ? (
+        {live ? (
           <div className="tabular mt-2 text-[17px] text-dim">응답 {total}명</div>
         ) : (
           <OfflineHint />
@@ -104,7 +109,7 @@ export function S2B() {
                   <span className="mr-2 text-seal">{"①②③"[i]}</span>
                   {opt}
                 </span>
-                {fbEnabled && (
+                {live && (
                   <span className="tabular text-[20px] font-bold text-seal">
                     {counts[i]}표
                   </span>
