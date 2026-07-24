@@ -8,7 +8,7 @@ import {
 import { POLL_OPTIONS } from "../slides/intro.jsx";
 import { WISH_PROMPT } from "../slides/closing.jsx";
 import { buildSlides } from "../slides/index.jsx";
-import { QUIZ_OPTIONS, QUIZ_ANSWER_INDEX } from "../config.js";
+import { QUIZ_OPTIONS } from "../config.js";
 import { DeckContext, STAGE_W, STAGE_H } from "../deck/Deck.jsx";
 
 const ALL_SLIDES = buildSlides();
@@ -47,7 +47,7 @@ export default function LiveApp() {
           ) : session.active === "poll" ? (
             <Poll />
           ) : session.active === "quiz" ? (
-            <Quiz revealed={!!session.quizRevealed} />
+            <Quiz />
           ) : session.active === "wish" ? (
             <Wish />
           ) : (
@@ -177,15 +177,13 @@ function Poll() {
   );
 }
 
-function Quiz({ revealed }) {
+function Quiz() {
   return (
     <ChoiceCard
       kind="quiz"
       storageKey="voted_quiz"
-      question="교육과정을 통째로 AI에 넣고, 1차시 학습 지원 자료 하나를 만드는 데 걸린 시간은?"
+      question="1차시 학습 지원 자료 하나를 만드는 데 걸리는 시간은?"
       options={QUIZ_OPTIONS}
-      revealed={revealed}
-      answerIndex={QUIZ_ANSWER_INDEX}
     />
   );
 }

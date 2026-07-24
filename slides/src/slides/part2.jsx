@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Slide, BottomLine, Card, Pill, OfflineHint } from "./common.jsx";
 import { fbEnabled, subscribeCounts } from "../firebase.js";
-import { useDeck } from "../deck/Deck.jsx";
 import {
   DEMO_URL,
   DEMO_INTRO,
@@ -9,7 +8,6 @@ import {
   DEMO_CAPTURE_2,
   WORKSHEET_CAPTURE,
   QUIZ_OPTIONS,
-  QUIZ_ANSWER_INDEX,
 } from "../config.js";
 
 const P2 = "PART 2 · 가져다 쓴 사람의 이야기";
@@ -129,9 +127,8 @@ export function S14() {
   );
 }
 
-// S14-B — [인터랙션 ②] 퀴즈 (핑크 블록)
+// S14-B — [인터랙션 ②] 실시간 설문 (핑크 블록, 정답 없음)
 export function S14B() {
-  const { quizRevealed } = useDeck();
   const [counts, setCounts] = useState(QUIZ_OPTIONS.map(() => 0));
   const [failed, setFailed] = useState(false);
   useEffect(
@@ -146,54 +143,37 @@ export function S14B() {
   const max = Math.max(1, ...counts);
 
   return (
-    <Slide tone="pink" eyebrow={`${P2} · 퀴즈 ②`}>
-      <h2 className="t-display-lg" style={{ fontSize: 48 }}>
-        교육과정을 통째로 AI에 넣고,
+    <Slide tone="pink" eyebrow={`${P2} · 실시간 설문 ②`}>
+      <h2 className="t-display-lg" style={{ fontSize: 52 }}>
+        1차시 학습 지원 자료 하나를
         <br />
-        1차시 학습 지원 자료 하나를 만드는 데 걸린 시간은?
+        만드는 데 걸리는 시간은?
       </h2>
       {live ? (
-        <div className="t-caption tabular mt-4 opacity-60">
-          응답 {total}명{!quizRevealed && <span className="ml-4">R = 정답 공개</span>}
-        </div>
+        <div className="t-caption tabular mt-4 opacity-60">응답 {total}명</div>
       ) : (
         <OfflineHint />
       )}
       <div className="mt-8 flex flex-1 flex-col justify-center gap-4">
-        {QUIZ_OPTIONS.map((opt, i) => {
-          const isAnswer = quizRevealed && i === QUIZ_ANSWER_INDEX;
-          return (
-            <div
-              key={i}
-              className={`rounded-[24px] p-4 transition-all ${
-                isAnswer ? "bg-canvas ring-4 ring-accent-magenta" : "bg-canvas"
-              }`}
-            >
-              <div className="mb-2 flex items-baseline justify-between">
-                <span className="t-headline">
-                  <span className="mr-3 opacity-40">{"①②③"[i]}</span>
-                  {opt}
-                  {isAnswer && (
-                    <span className="t-caption ml-4 rounded-[50px] bg-accent-magenta px-3 py-1 text-inverse-ink">
-                      정답
-                    </span>
-                  )}
-                </span>
-                {live && (
-                  <span className="t-card-title tabular">{counts[i]}표</span>
-                )}
-              </div>
-              <div className="h-6 w-full overflow-hidden rounded-[50px] bg-surface-soft">
-                <div
-                  className={`h-full rounded-[50px] transition-all duration-500 ${
-                    isAnswer ? "bg-accent-magenta" : "bg-ink"
-                  }`}
-                  style={{ width: `${(counts[i] / max) * 100}%` }}
-                />
-              </div>
+        {QUIZ_OPTIONS.map((opt, i) => (
+          <div key={i} className="rounded-[24px] bg-canvas p-4">
+            <div className="mb-2 flex items-baseline justify-between">
+              <span className="t-headline">
+                <span className="mr-3 opacity-40">{"①②③"[i]}</span>
+                {opt}
+              </span>
+              {live && (
+                <span className="t-card-title tabular">{counts[i]}표</span>
+              )}
             </div>
-          );
-        })}
+            <div className="h-6 w-full overflow-hidden rounded-[50px] bg-surface-soft">
+              <div
+                className="h-full rounded-[50px] bg-ink transition-all duration-500"
+                style={{ width: `${(counts[i] / max) * 100}%` }}
+              />
+            </div>
+          </div>
+        ))}
       </div>
     </Slide>
   );
@@ -206,7 +186,7 @@ const PIPELINE = [
   "바이브 코딩으로 차시별 학습지원 소프트웨어 제작",
   "에듀테크 심의 신청·등록",
   "학교운영위원회 심의",
-  "개인정보 수집 시 동의 가정통신문",
+  "(필요시) 개인정보 수집 시 동의 가정통신문",
   "수업 적용",
 ];
 
