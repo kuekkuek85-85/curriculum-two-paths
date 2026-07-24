@@ -1,5 +1,5 @@
 import { WORKSHEET_CAPTURE } from "../config.js";
-import { S1, S2, S2B } from "./intro.jsx";
+import { S1, S1B, S2, S2B } from "./intro.jsx";
 import {
   S3,
   S4,
@@ -25,6 +25,7 @@ const FIN = "마무리";
 export function buildSlides() {
   const slides = [
     { id: "S1", section: INTRO, title: "타이틀 · QR 대기 화면", comp: S1 },
+    { id: "S1-B", section: INTRO, title: "강사 소개", comp: S1B },
     { id: "S2", section: INTRO, title: "과목 개발의 두 가지 경로", comp: S2 },
     { id: "S2-B", section: INTRO, title: "실시간 폴 ① 지원자료", comp: S2B, interaction: "poll" },
     { id: "S3", section: P1, title: "PART 1 표지", comp: S3 },

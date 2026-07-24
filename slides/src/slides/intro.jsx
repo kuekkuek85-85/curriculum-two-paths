@@ -21,20 +21,66 @@ export function S1() {
           </p>
           <div className="mt-14">
             <div className="t-card-title">이승엽 — 장평중학교 정보 교사</div>
-            <div className="t-caption mt-2 opacity-60">
-              서울시교육청 1호 교사 개발자
-            </div>
           </div>
         </div>
         <div className="flex w-[330px] shrink-0 flex-col items-center gap-5">
           <div className="rounded-[24px] bg-block-lime p-8">
             <AutoQR path="/live" size={190} />
           </div>
-          <p className="t-body-lg text-center">
-            휴대폰이나 노트북으로 접속해 두세요
-            <br />
-            <span className="t-link">오늘 세 번, 여러분의 답이 이 화면에 뜹니다</span>
-          </p>
+          <p className="t-body-lg text-center">휴대폰이나 노트북으로 접속해 두세요</p>
+        </div>
+      </div>
+    </Slide>
+  );
+}
+
+// S1-B — 강사 소개
+const CAREER = ["(전) NAVER 개발자 근무", "(전) LG전자 개발자 근무", "(현) 장평중학교 근무"];
+const CURRICULA = [
+  "2022 중학교 서울시교육감 승인과목(선택) '디지털 시민으로 성장하기'",
+  "2022 중학교 서울시교육감 승인과목(선택) '인공지능과 기후위기로 배우는 나의 미래'",
+  "2022 중학교 서울시교육감 승인과목(선택) '사회정서교육을 통한 마음 성장'",
+  "2022 중학교 서울시교육감 승인과목(정보과) '프로그래밍과 인공지능 로봇'",
+];
+const TEXTBOOKS = [
+  "2022 중학교 '정보' 교과서 (교학사)",
+  "2022 중학교 '프로그래밍과 인공지능 로봇' 교과서 (책밥)",
+];
+
+export function S1B() {
+  return (
+    <Slide tone="mint" eyebrow="도입 · 강사 소개">
+      <div className="flex flex-1 gap-10">
+        <div className="w-[300px] shrink-0">
+          <div className="t-display-lg" style={{ fontSize: 56 }}>
+            이승엽
+          </div>
+          <div className="t-headline mt-3 opacity-70">
+            서울시교육청 1호 교사 개발자
+          </div>
+          <ul className="t-body-lg mt-9 space-y-3">
+            {CAREER.map((c) => (
+              <li key={c}>{c}</li>
+            ))}
+          </ul>
+        </div>
+        <div className="flex flex-1 flex-col gap-5">
+          <Card className="flex-[4] flex flex-col">
+            <div className="t-caption opacity-60">교육과정</div>
+            <ul className="t-body mt-4 space-y-2.5">
+              {CURRICULA.map((c) => (
+                <li key={c}>{c}</li>
+              ))}
+            </ul>
+          </Card>
+          <Card className="flex-[3] flex flex-col">
+            <div className="t-caption opacity-60">교과서</div>
+            <ul className="t-body mt-4 space-y-2.5">
+              {TEXTBOOKS.map((c) => (
+                <li key={c}>{c}</li>
+              ))}
+            </ul>
+          </Card>
         </div>
       </div>
     </Slide>

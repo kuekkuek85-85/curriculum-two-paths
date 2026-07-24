@@ -34,10 +34,10 @@ export default function LiveApp() {
     <div className="min-h-full bg-canvas text-ink">
       <div className="mx-auto flex min-h-dvh w-full max-w-[640px] flex-col px-5 py-6">
         <header className="mb-6 border-b border-hairline pb-3">
-          <div className="t-eyebrow opacity-60" style={{ fontSize: 13 }}>
+          <div className="t-eyebrow opacity-60" style={{ fontSize: 14 }}>
             2026 학교자율시간 과목 개발 전문가 연수 · 1교시
           </div>
-          <h1 className="mt-1 text-lg font-bold tracking-tight">
+          <h1 className="mt-1 text-xl font-bold tracking-tight">
             학교자율시간 과목 개발 및 운영 사례 — 참여 페이지
           </h1>
         </header>
@@ -63,8 +63,8 @@ function Waiting({ text }) {
   return (
     <div className="rounded-[24px] bg-surface-soft p-10 text-center">
       <div className="text-4xl">⏳</div>
-      <p className="mt-4 text-lg font-bold">{text}</p>
-      <p className="mt-2 text-sm opacity-60">
+      <p className="mt-4 text-xl font-bold">{text}</p>
+      <p className="mt-2 text-base opacity-60">
         발표가 진행되면 이 화면이 자동으로 바뀝니다 — 화면을 켜 둔 채 기다려 주세요.
       </p>
     </div>
@@ -131,7 +131,7 @@ function ChoiceCard({ kind, question, options, storageKey, revealed, answerIndex
 
   return (
     <div className="rounded-[24px] bg-surface-soft p-6">
-      <h2 className="text-xl font-bold leading-snug">{question}</h2>
+      <h2 className="text-2xl font-bold leading-snug">{question}</h2>
       <div className="mt-5 flex flex-col gap-3">
         {options.map((opt, i) => {
           const mine = voted === String(i);
@@ -141,7 +141,7 @@ function ChoiceCard({ kind, question, options, storageKey, revealed, answerIndex
               key={i}
               disabled={voted !== null || busy}
               onClick={() => vote(i)}
-              className={`rounded-[50px] border-2 p-4 text-left text-lg font-bold transition ${
+              className={`rounded-[50px] border-2 p-4 text-left text-xl font-bold leading-snug transition ${
                 isAnswer
                   ? "border-accent-magenta bg-accent-magenta/10 text-accent-magenta"
                   : mine
@@ -151,14 +151,14 @@ function ChoiceCard({ kind, question, options, storageKey, revealed, answerIndex
             >
               <span className="mr-2">{"①②③"[i]}</span>
               {opt}
-              {mine && !isAnswer && <span className="ml-2 text-sm">✓ 내 선택</span>}
-              {isAnswer && <span className="ml-2 text-sm">← 정답!</span>}
+              {mine && !isAnswer && <span className="ml-2 text-base">✓ 내 선택</span>}
+              {isAnswer && <span className="ml-2 text-base">← 정답!</span>}
             </button>
           );
         })}
       </div>
       {voted !== null && !revealed && (
-        <p className="mt-4 text-center text-sm font-semibold opacity-60">
+        <p className="mt-4 text-center text-base font-semibold opacity-60">
           제출 완료! 앞 화면을 봐 주세요.
         </p>
       )}
@@ -210,7 +210,7 @@ function Wish() {
 
   return (
     <div className="rounded-[24px] bg-surface-soft p-6">
-      <h2 className="text-xl font-bold leading-snug">{WISH_PROMPT}</h2>
+      <h2 className="text-2xl font-bold leading-snug">{WISH_PROMPT}</h2>
       <div className="mt-5 flex flex-col gap-3">
         <input
           type="text"
@@ -222,19 +222,19 @@ function Wish() {
           }}
           onKeyDown={(e) => e.key === "Enter" && submit()}
           placeholder="과목명 — 지원자료 (50자 이내)"
-          className="w-full rounded-[50px] border-2 border-hairline bg-canvas px-5 py-4 text-lg font-semibold outline-none focus:border-ink"
+          className="w-full rounded-[50px] border-2 border-hairline bg-canvas px-5 py-4 text-xl font-semibold outline-none focus:border-ink"
         />
-        <div className="tabular text-right text-xs opacity-50">{text.length}/50</div>
+        <div className="tabular text-right text-sm opacity-50">{text.length}/50</div>
         <button
           onClick={submit}
           disabled={!text.trim() || busy}
-          className="rounded-[50px] bg-ink px-6 py-4 text-lg font-bold text-inverse-ink transition active:scale-[0.98] disabled:opacity-40"
+          className="rounded-[50px] bg-ink px-6 py-4 text-xl font-bold text-inverse-ink transition active:scale-[0.98] disabled:opacity-40"
         >
           앞 화면에 띄우기
         </button>
       </div>
       {sent && (
-        <p className="mt-4 text-center text-sm font-semibold opacity-60">
+        <p className="mt-4 text-center text-base font-semibold opacity-60">
           전송 완료! 앞 화면에 곧 나타납니다. 하나 더 보내셔도 됩니다.
         </p>
       )}
