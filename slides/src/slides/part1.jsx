@@ -15,6 +15,16 @@ export function S3() {
         <div className="t-caption mt-14 border-t border-ink/20 pt-5">
           2024 하반기 교육감 승인 신설과목 · 장평중학교
         </div>
+        <div className="mt-8">
+          <a
+            href="/files/디지털시민으로성장하기-교육과정.pdf"
+            download="디지털 시민으로 성장하기 교육과정.pdf"
+            onClick={(e) => e.stopPropagation()}
+            className="t-button inline-flex items-center gap-2 rounded-[50px] bg-ink px-6 py-3 text-inverse-ink transition hover:opacity-80"
+          >
+            ⬇ 교육과정 문서 내려받기 (PDF)
+          </a>
+        </div>
       </div>
     </Slide>
   );
