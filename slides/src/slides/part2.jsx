@@ -355,6 +355,10 @@ export function S17() {
             href="/files/학습지원자료-템플릿-예시.hwpx"
             name="템플릿 예시.hwpx"
           />
+          <DownloadPill
+            href="/files/학습지원자료-제작-프롬프트-모음.docx"
+            name="제작 프롬프트 모음.docx"
+          />
         </Step>
         <Step
           n="02"
