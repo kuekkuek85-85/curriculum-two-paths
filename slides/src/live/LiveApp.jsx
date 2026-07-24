@@ -62,15 +62,16 @@ function Waiting({ text }) {
 }
 
 // 인터랙션이 없는 슬라이드는 강사 화면을 그대로 축소 미러링한다.
+// aspect-ratio CSS에 기대지 않고, 측정한 너비로 높이를 직접 계산해 구형 웹뷰에서도 안전하게 맞춘다.
 function SlideMirror({ slideId }) {
   const slide = ALL_SLIDES.find((s) => s.id === slideId);
   const ref = useRef(null);
-  const [scale, setScale] = useState(0);
+  const [width, setWidth] = useState(0);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const update = () => setScale(el.clientWidth / STAGE_W);
+    const update = () => setWidth(el.clientWidth);
     update();
     const ro = new ResizeObserver(update);
     ro.observe(el);
@@ -85,15 +86,17 @@ function SlideMirror({ slideId }) {
 
   if (!slide) return <Waiting text="화면을 불러오는 중…" />;
   const Comp = slide.comp;
+  const scale = width / STAGE_W;
+  const height = width * (STAGE_H / STAGE_W);
 
   return (
     <div>
       <div
         ref={ref}
         className="w-full overflow-hidden rounded-[24px] shadow-lg"
-        style={{ aspectRatio: `${STAGE_W} / ${STAGE_H}` }}
+        style={{ height: width > 0 ? height : 0 }}
       >
-        {scale > 0 && (
+        {width > 0 && (
           <div
             key={slide.id}
             className="slide-enter origin-top-left"
