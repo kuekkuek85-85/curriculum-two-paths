@@ -134,7 +134,7 @@ export default function Deck() {
       <div className="fixed inset-0 flex items-center justify-center overflow-hidden bg-[#15181f]">
         <div
           style={{ width: STAGE_W, height: STAGE_H, transform: `scale(${scale})` }}
-          className="relative shrink-0 overflow-hidden bg-paper text-ink shadow-2xl"
+          className="relative shrink-0 overflow-hidden bg-canvas text-ink shadow-2xl"
           onClick={() => {
             setOverview(false);
             setIndex((v) => Math.min(slides.length - 1, v + 1));
@@ -147,20 +147,20 @@ export default function Deck() {
 
           {/* 진행 표시: 섹션 라벨 + 진행바 + 페이지 번호 */}
           <div className="absolute inset-x-0 bottom-0">
-            <div className="flex items-end justify-between px-6 pb-1.5 text-[13px] text-dim">
+            <div className="flex items-end justify-between px-6 pb-1.5 text-[13px] opacity-50">
               <span>{slide.section}</span>
               <span className="tabular">
                 {jumpBuffer && (
-                  <span className="mr-3 rounded bg-ink px-2 py-0.5 text-paper">
+                  <span className="mr-3 rounded bg-ink px-2 py-0.5 text-inverse-ink">
                     {jumpBuffer} ⏎
                   </span>
                 )}
                 {index + 1} / {slides.length}
               </span>
             </div>
-            <div className="h-[3px] w-full bg-line">
+            <div className="h-[3px] w-full bg-hairline">
               <div
-                className="h-full bg-seal transition-[width] duration-200"
+                className="h-full bg-ink transition-[width] duration-200"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -173,12 +173,12 @@ export default function Deck() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="mb-4 flex items-center justify-between">
-                <div className="text-lg font-bold text-paper">
-                  전체 슬라이드 <span className="text-dim">(클릭 이동 · O 닫기)</span>
+                <div className="text-lg font-bold text-inverse-ink">
+                  전체 슬라이드 <span className="opacity-50">(클릭 이동 · O 닫기)</span>
                 </div>
                 {fbEnabled && (
                   <button
-                    className="rounded border border-stamp px-3 py-1 text-sm text-[#ff8c7a] hover:bg-stamp hover:text-paper"
+                    className="rounded border border-accent-magenta px-3 py-1 text-sm text-accent-magenta hover:bg-accent-magenta hover:text-inverse-ink"
                     onClick={async (e) => {
                       e.stopPropagation();
                       if (confirm("폴·퀴즈·자유입력 응답 데이터를 모두 삭제할까요?")) {
@@ -196,8 +196,8 @@ export default function Deck() {
                   <button
                     key={s.id}
                     onClick={() => goto(i)}
-                    className={`rounded-lg border p-3 text-left text-paper transition hover:border-seal hover:bg-seal/20 ${
-                      i === index ? "border-seal bg-seal/25" : "border-white/20"
+                    className={`rounded-lg border p-3 text-left text-inverse-ink transition hover:border-block-lime hover:bg-block-lime/20 ${
+                      i === index ? "border-block-lime bg-block-lime/25" : "border-white/20"
                     }`}
                   >
                     <div className="tabular text-xs text-white/50">

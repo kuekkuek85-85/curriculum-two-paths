@@ -1,15 +1,34 @@
 @import "tailwindcss";
 @import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 
+/* design.md — 모노크롬 코어 + 오버사이즈 파스텔 컬러 블록 */
 @theme {
-  --color-paper: #fafaf7;
-  --color-ink: #1a2332;
-  --color-seal: #0f6b4f;
-  --color-stamp: #c0392b;
-  --color-line: #d8d6ce;
-  --color-dim: #6b7280;
+  /* Brand & Accent */
+  --color-ink: #000000;
+  --color-canvas: #ffffff;
+  --color-inverse-canvas: #000000;
+  --color-inverse-ink: #ffffff;
+  --color-accent-magenta: #e8408a;
+
+  /* Surface */
+  --color-surface-soft: #f4f4f2;
+  --color-hairline: #e2e2df;
+  --color-hairline-soft: #efefec;
+
+  /* Color blocks */
+  --color-block-lime: #d7f26a;
+  --color-block-lilac: #cfc4f7;
+  --color-block-cream: #f4eddd;
+  --color-block-mint: #bfe9d6;
+  --color-block-pink: #f9d5e5;
+  --color-block-coral: #ffa487;
+  --color-block-navy: #1e1b4b;
+
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, "Segoe UI",
-    "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    system-ui, sans-serif;
+  /* figmaMono 대체: 오프라인 보장을 위해 시스템 모노 스택 사용 (한글은 Pretendard로 폴백) */
+  --font-mono: ui-monospace, "Cascadia Mono", "SF Mono", Consolas,
+    "Pretendard Variable", monospace;
 }
 
 html,
@@ -20,16 +39,90 @@ body,
 
 body {
   margin: 0;
-  background: #15181f;
+  background: #0a0a0a;
   font-family: var(--font-sans);
+  color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
+  font-feature-settings: "kern" 1;
+}
+
+/* ── 타이포그래피 스케일 (design.md Hierarchy) ───────────────── */
+.t-display-xl {
+  font-size: 86px;
+  font-weight: 340;
+  line-height: 1;
+  letter-spacing: -1.72px;
+}
+.t-display-lg {
+  font-size: 64px;
+  font-weight: 340;
+  line-height: 1.1;
+  letter-spacing: -0.96px;
+}
+.t-headline {
+  font-size: 26px;
+  font-weight: 540;
+  line-height: 1.35;
+  letter-spacing: -0.26px;
+}
+.t-subhead {
+  font-size: 26px;
+  font-weight: 340;
+  line-height: 1.35;
+  letter-spacing: -0.26px;
+}
+.t-card-title {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+.t-body-lg {
+  font-size: 20px;
+  font-weight: 330;
+  line-height: 1.4;
+  letter-spacing: -0.14px;
+}
+.t-body {
+  font-size: 18px;
+  font-weight: 320;
+  line-height: 1.45;
+  letter-spacing: -0.26px;
+}
+.t-body-sm {
+  font-size: 16px;
+  font-weight: 330;
+  line-height: 1.45;
+  letter-spacing: -0.14px;
+}
+.t-link,
+.t-button {
+  font-size: 20px;
+  font-weight: 480;
+  line-height: 1.4;
+  letter-spacing: -0.1px;
+}
+.t-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0.54px;
+  text-transform: uppercase;
+}
+.t-caption {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
 }
 
 .tabular {
   font-variant-numeric: tabular-nums;
 }
 
-/* 슬라이드 전환: 절제된 페이드+슬라이드 하나 (250ms 이내) */
+/* ── 모션 ────────────────────────────────────────────────── */
 .slide-enter {
   animation: slide-in 240ms ease-out both;
 }
@@ -44,7 +137,6 @@ body {
   }
 }
 
-/* 요소 순차 등장 (S15 파이프라인 전용) */
 .stagger > * {
   animation: rise-in 360ms ease-out both;
 }
@@ -59,17 +151,17 @@ body {
   }
 }
 
-/* '적합' 도장 (S7 전용) */
+/* '적합' 도장 — accent-magenta는 페이지당 1회만 쓰는 단발 색 (S7 전용) */
 .stamp-seal {
   display: inline-block;
-  border: 5px solid var(--color-stamp);
-  color: var(--color-stamp);
-  border-radius: 10px;
-  padding: 0.15em 0.4em;
-  font-weight: 800;
-  letter-spacing: 0.25em;
+  border: 5px solid var(--color-accent-magenta);
+  color: var(--color-accent-magenta);
+  border-radius: 9999px;
+  padding: 0.1em 0.5em;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
   transform: rotate(-7deg);
-  box-shadow: 0 0 0 2px rgba(192, 57, 43, 0.15);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -80,6 +172,6 @@ body {
 }
 
 :focus-visible {
-  outline: 3px solid var(--color-seal);
-  outline-offset: 2px;
+  outline: 3px solid var(--color-accent-magenta);
+  outline-offset: 3px;
 }
