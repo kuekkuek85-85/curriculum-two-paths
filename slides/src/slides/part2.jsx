@@ -1,14 +1,7 @@
 import { useEffect, useState } from "react";
-import { Slide, BottomLine, Card, Pill, OfflineHint } from "./common.jsx";
+import { Slide, BottomLine, Card, OfflineHint } from "./common.jsx";
 import { fbEnabled, subscribeCounts } from "../firebase.js";
-import {
-  DEMO_URL,
-  DEMO_INTRO,
-  DEMO_CAPTURE_1,
-  DEMO_CAPTURE_2,
-  WORKSHEET_CAPTURE,
-  QUIZ_OPTIONS,
-} from "../config.js";
+import { WORKSHEET_CAPTURE, QUIZ_OPTIONS } from "../config.js";
 
 const P2 = "PART 2 · 가져다 쓴 사람의 이야기";
 
@@ -256,63 +249,147 @@ export function S15B() {
   );
 }
 
-// S16 — 라이브 시연
+// S16 — 라이브 시연: 완성작 '우리반 마음 소포' (연도별 버전)
+const DEMO_LINKS = [
+  [
+    "2026",
+    "올해 버전 · 반별 '마음 소포' 카드뉴스 웹앱",
+    "https://2026-teachers-day-event.vercel.app/",
+  ],
+  ["2025", "지난해 버전 (Canva)", "https://canva.link/verviyl7q3aw2ll"],
+];
+
 export function S16() {
   return (
-    <Slide eyebrow={`${P2} · 라이브 시연`}>
-      <div className="flex h-full flex-col items-center justify-center gap-7">
-        {DEMO_URL ? (
-          <Pill
-            as="a"
-            href={DEMO_URL}
+    <Slide tone="lime" eyebrow={`${P2} · 라이브 시연`}>
+      <h2 className="t-display-lg" style={{ fontSize: 52 }}>
+        완성작 시연 — '우리반 마음 소포'
+      </h2>
+      <p className="t-body-lg mt-3 opacity-70">
+        스승의 날 이벤트 · 사회정서교육 · 정보 교과 CCL 연계
+      </p>
+      <div className="mt-9 flex flex-1 flex-col justify-center gap-5">
+        {DEMO_LINKS.map(([year, desc, url]) => (
+          <a
+            key={year}
+            href={url}
             target="_blank"
             rel="noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="!px-14 !py-6"
-            style={{ fontSize: 40, lineHeight: 1.1 }}
+            className="flex items-center gap-7 rounded-[24px] bg-canvas p-7 transition hover:ring-2 hover:ring-ink"
           >
-            시연 열기 →
-          </Pill>
-        ) : (
-          <div className="t-display-lg cursor-not-allowed rounded-[50px] bg-surface-soft px-14 py-6 opacity-60">
-            시연 링크 준비 중
-          </div>
-        )}
-        <p className="t-body-lg opacity-60">
-          {DEMO_INTRO || "차시별 학습지원 소프트웨어 시연"}
-        </p>
+            <span className="t-display-lg tabular" style={{ fontSize: 44 }}>
+              {year}
+            </span>
+            <span className="t-headline flex-1">{desc}</span>
+            <span className="t-button shrink-0 rounded-[50px] bg-ink px-6 py-2.5 text-inverse-ink">
+              열기 →
+            </span>
+          </a>
+        ))}
       </div>
+      <BottomLine>이 앱이 파이프라인의 최종 결과물입니다.</BottomLine>
     </Slide>
   );
 }
 
-// S17 — 시연 백업 캡처
-export function S17() {
-  const caps = [DEMO_CAPTURE_1, DEMO_CAPTURE_2];
+// S17 — 제작 & 등록 과정 (템플릿 → 소프트웨어화 → 서류 자동생성 → 등록)
+function DownloadPill({ href, name }) {
   return (
-    <Slide eyebrow={`${P2} · 시연 백업`}>
-      <div className="flex h-full gap-5">
-        {caps.map((src, i) =>
-          src ? (
-            <div
-              key={i}
-              className="flex min-w-0 flex-1 items-center justify-center rounded-[24px] bg-surface-soft p-4"
-            >
-              <img
-                src={src}
-                alt={`시연 캡처 ${i + 1}`}
-                className="max-h-full max-w-full rounded-[8px] object-contain"
+    <a
+      href={href}
+      download={name}
+      onClick={(e) => e.stopPropagation()}
+      className="t-button inline-flex items-center gap-2 rounded-[50px] bg-ink px-5 py-2 text-inverse-ink transition hover:opacity-80"
+    >
+      ⬇ {name}
+    </a>
+  );
+}
+
+function LinkPill({ href, children }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      onClick={(e) => e.stopPropagation()}
+      className="t-button inline-flex items-center gap-2 rounded-[50px] bg-canvas px-5 py-2 ring-2 ring-ink transition hover:bg-ink hover:text-inverse-ink"
+    >
+      {children} ↗
+    </a>
+  );
+}
+
+export function S17() {
+  return (
+    <Slide eyebrow={`${P2} · 제작 & 등록`}>
+      <h2 className="t-display-lg" style={{ fontSize: 44 }}>
+        학습지원 소프트웨어, 이렇게 만들고 등록합니다
+      </h2>
+      <div className="mt-5 flex min-h-0 flex-1 flex-col justify-center gap-2.5">
+        <div className="flex items-start gap-5 rounded-[24px] bg-surface-soft p-4">
+          <span className="t-card-title tabular opacity-30">01</span>
+          <div className="flex-1">
+            <div className="t-headline">학습지원자료 템플릿을 생성형 AI로 채우기</div>
+            <p className="t-body mt-1 opacity-70">
+              빈 템플릿(hwpx)을 내려받아 교육과정을 컨텍스트로 넣고 차시별 내용을 AI로 완성
+            </p>
+            <div className="mt-3">
+              <DownloadPill
+                href="/files/학습지원자료-템플릿-예시.hwpx"
+                name="학습지원자료 템플릿 예시.hwpx"
               />
             </div>
-          ) : (
-            <div
-              key={i}
-              className="t-body-lg flex flex-1 items-center justify-center rounded-[24px] bg-surface-soft opacity-40"
-            >
-              캡처 이미지 자리
+          </div>
+        </div>
+        <div className="flex items-start gap-5 rounded-[24px] bg-surface-soft p-4">
+          <span className="t-card-title tabular opacity-30">02</span>
+          <div className="flex-1">
+            <div className="t-headline">ChatGPT Sites로 바이브코딩 웹앱 제작·배포</div>
+            <p className="t-body mt-1 opacity-70">
+              만든 학습지원자료 내용으로 학습지원 소프트웨어를 만들어 배포
+            </p>
+            <div className="mt-3">
+              <LinkPill href="https://chatgpt.com/sites">chatgpt.com/sites</LinkPill>
             </div>
-          )
-        )}
+          </div>
+        </div>
+        <div className="flex items-start gap-5 rounded-[24px] bg-surface-soft p-4">
+          <span className="t-card-title tabular opacity-30">03</span>
+          <div className="flex-1">
+            <div className="t-headline">등록 서류 자동 생성 (AI)</div>
+            <p className="t-body mt-1 opacity-70">
+              배포한 앱을 기준으로 개인정보 처리방침·체크리스트(hwpx)를 AI로 자동 작성
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <DownloadPill
+                href="/files/예시-개인정보처리방침.hwpx"
+                name="(예시) 개인정보 처리방침.hwpx"
+              />
+              <DownloadPill
+                href="/files/예시-체크리스트.hwpx"
+                name="(예시) 체크리스트.hwpx"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="flex items-start gap-5 rounded-[24px] bg-surface-soft p-4">
+          <span className="t-card-title tabular opacity-30">04</span>
+          <div className="flex-1">
+            <div className="t-headline">edzip.kr 교사 로그인 → 등록</div>
+            <p className="t-body mt-1 opacity-70">
+              에듀집에 교사로 로그인해 학습지원 소프트웨어를 등록
+            </p>
+            <div className="mt-3">
+              <LinkPill href="https://edzip.kr/">edzip.kr</LinkPill>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="t-body-sm mt-4 rounded-[16px] bg-surface-soft px-5 py-3 opacity-70">
+        ※ 사업자 등록자가 아닌 교사 등 개인이 만든 학습지원 소프트웨어 체크리스트 등록
+        문의: 한국교육학술정보원 교수학습지원부 (053-714-0357, 0308)
       </div>
     </Slide>
   );
