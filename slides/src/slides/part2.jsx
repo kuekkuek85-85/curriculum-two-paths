@@ -92,24 +92,37 @@ export function S13B() {
 export function S14() {
   return (
     <Slide eyebrow={P2}>
-      <h2 className="t-display-lg" style={{ fontSize: 60 }}>
-        개발 취지는 개발자의 것,
-        <br />
-        수업은 우리의 것
+      <h2 className="t-display-lg" style={{ fontSize: 52 }}>
+        개발 취지는 개발자의 것, 수업은 우리의 것
       </h2>
-      <div className="mt-10 flex flex-1 flex-col justify-center gap-5">
-        <Card>
-          <div className="t-headline">'생성형 인공지능 제대로 뽑아먹기'</div>
-          <p className="t-body-lg mt-2 opacity-70">
-            프롬프트 엔지니어링 → 체육 융합 챗봇 → 나만의 사업 계획 (1학년 9차시)
-          </p>
-        </Card>
-        <Card>
-          <div className="t-headline">'착한 인공지능을 활용하기 위한 노력'</div>
-          <p className="t-body-lg mt-2 opacity-70">
-            인공지능으로 멧돼지·가축돼지 분류 (공개수업)
-          </p>
-        </Card>
+      <div className="mt-8 flex min-h-0 flex-1 gap-6">
+        <div className="flex flex-1 flex-col justify-center gap-4">
+          <Card>
+            <div className="t-headline">'생성형 인공지능 제대로 뽑아먹기'</div>
+            <p className="t-body-lg mt-2 opacity-70">
+              프롬프트 엔지니어링 → 체육 융합 챗봇 → 나만의 사업 계획 (1학년 9차시)
+            </p>
+          </Card>
+          <Card>
+            <div className="t-headline">'착한 인공지능을 활용하기 위한 노력'</div>
+            <p className="t-body-lg mt-2 opacity-70">
+              인공지능으로 멧돼지·가축돼지 분류 (공개수업)
+            </p>
+          </Card>
+          <Card>
+            <div className="t-headline">스승의 날 이벤트 · 사회정서교육</div>
+            <p className="t-body-lg mt-2 opacity-70">
+              '우리반 마음 소포' 카드뉴스 제작 → 반별 스승의 날 발송 (정보 교과 CCL 연계)
+            </p>
+          </Card>
+        </div>
+        <div className="flex w-[38%] shrink-0 items-center justify-center overflow-hidden rounded-[24px] bg-surface-soft p-4">
+          <img
+            src="/img/teachers-day-event.png"
+            alt="스승의 날 이벤트 — 우리반 마음 소포 카드뉴스 웹앱"
+            className="max-h-full max-w-full rounded-[8px] object-contain"
+          />
+        </div>
       </div>
       <BottomLine>필요한 건 단 하나 — 우리 교실에 맞는 지원 자료</BottomLine>
     </Slide>
