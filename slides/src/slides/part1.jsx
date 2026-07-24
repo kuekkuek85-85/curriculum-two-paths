@@ -229,17 +229,26 @@ export function S10() {
       <h2 className="t-display-lg mb-8" style={{ fontSize: 52 }}>
         교실에서 ① 정보과 사례
       </h2>
-      <Card className="flex flex-1 flex-col">
-        <div className="t-display-lg" style={{ fontSize: 40 }}>
-          정보 윤리 꾸러미로 디지털 시민성 쑥쑥
+      <div className="flex flex-1 gap-6">
+        <Card className="flex flex-1 flex-col">
+          <div className="t-display-lg" style={{ fontSize: 38 }}>
+            정보 윤리 꾸러미로 디지털 시민성 쑥쑥
+          </div>
+          <div className="t-caption mt-3 opacity-60">1학년 정보 · 7차시</div>
+          <ul className="t-headline mt-7 space-y-4">
+            <li>'털린 내 정보 찾기'로 내 개인정보 유출 직접 조회</li>
+            <li>스미싱·보이스피싱 간접 체험</li>
+            <li>배움을 교내 인공지능 창작대회로 연결 → 2학기 프로그래밍 단원으로 심화</li>
+          </ul>
+        </Card>
+        <div className="flex w-[42%] shrink-0 items-center justify-center overflow-hidden rounded-[24px] bg-surface-soft p-4">
+          <img
+            src="/img/voice-phishing.png"
+            alt="보이스피싱 체험 활동 — 학생들이 노트북으로 실습하는 교실 모습"
+            className="max-h-full max-w-full rounded-[8px] object-contain"
+          />
         </div>
-        <div className="t-caption mt-3 opacity-60">1학년 정보 · 7차시</div>
-        <ul className="t-headline mt-8 space-y-4">
-          <li>'털린 내 정보 찾기'로 내 개인정보 유출 직접 조회</li>
-          <li>스미싱·보이스피싱 간접 체험</li>
-          <li>배움을 교내 인공지능 창작대회로 연결 → 2학기 프로그래밍 단원으로 심화</li>
-        </ul>
-      </Card>
+      </div>
       <BottomLine>교과 수업 → 대회 → 다음 학기 교과로 이어지는 나선형 설계</BottomLine>
     </Slide>
   );
