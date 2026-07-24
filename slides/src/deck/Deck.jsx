@@ -10,7 +10,6 @@ import { buildSlides } from "../slides/index.jsx";
 import {
   fbEnabled,
   setSessionState,
-  subscribeSession,
   resetAllResponses,
 } from "../firebase.js";
 
@@ -71,21 +70,11 @@ export default function Deck() {
       active: next,
       ...(next === "quiz" ? { quizRevealed: false } : {}),
     });
+    // 세션 반영은 이 슬라이드 변경 시점의 단발 쓰기로만 한다.
+    // 과거에는 Firestore 세션을 지속적으로 구독해 "어긋나면 되돌리는" 자가 치유 효과가 있었는데,
+    // 발표자 화면이 두 개 이상(탭·창·기기 중복) 열리면 서로 상대방의 값을 계속 되돌리며
+    // 무한 핑퐁(빠른 깜빡임)이 발생했다. 지속 구독형 보정 없이 마지막 쓰기가 이기도록 단순화한다.
   }, [index, slides]);
-
-  // 세션이 현재 슬라이드와 어긋나면 발표자 덱이 다시 맞춘다.
-  // 다른 창이 덮어썼거나 쓰기가 한 번 실패했을 때 /live가 멈춰 있지 않도록 하는 안전장치.
-  useEffect(() => {
-    if (!fbEnabled) return;
-    return subscribeSession((s) => {
-      if (!hasActivated.current) return;
-      const expectedSlide = slides[indexRef.current];
-      const expected = expectedSlide.interaction ?? null;
-      if (s.active !== expected || s.slideId !== expectedSlide.id) {
-        setSessionState({ slideId: expectedSlide.id, active: expected });
-      }
-    });
-  }, [slides]);
 
   const revealQuiz = () => {
     setQuizRevealed(true);
