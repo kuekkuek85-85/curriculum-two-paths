@@ -124,6 +124,18 @@ export function S20() {
           <div className="t-card-title mt-8 opacity-70">
             이승엽 · 장평중학교 정보 교사
           </div>
+          <a
+            href="/hwpx"
+            target="_blank"
+            rel="noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="t-button mt-10 inline-flex items-center gap-2 rounded-[50px] bg-block-lime px-7 py-3.5 text-ink transition hover:opacity-90"
+          >
+            🖍️ 교육과정 초안 AI 첨삭기 열기 →
+          </a>
+          <p className="t-body-sm mt-3 opacity-50">
+            HWPX 초안을 올리면 교안 기준으로 점검 메모를 달아 드립니다
+          </p>
         </div>
         <div className="flex w-[330px] shrink-0 flex-col items-center gap-5">
           <div className="rounded-[24px] bg-block-lime p-8">
