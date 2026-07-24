@@ -44,6 +44,9 @@ body {
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
   font-feature-settings: "kern" 1;
+  /* 한글 단어가 중간에서 개행되지 않도록(어절 단위 줄바꿈). 너무 긴 토큰은 넘칠 때만 분리 */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 /* ── 타이포그래피 스케일 (design.md Hierarchy) ───────────────── */
