@@ -14,11 +14,11 @@ import {
   resetAllResponses,
 } from "../firebase.js";
 
-const STAGE_W = 1280;
-const STAGE_H = 720;
+export const STAGE_W = 1280;
+export const STAGE_H = 720;
 const SLIDE_KEY = "deck.slideIndex";
 
-const DeckContext = createContext(null);
+export const DeckContext = createContext(null);
 export const useDeck = () => useContext(DeckContext);
 
 export default function Deck() {
@@ -67,6 +67,7 @@ export default function Deck() {
     if (next !== null) hasActivated.current = true;
 
     setSessionState({
+      slideId: s.id,
       active: next,
       ...(next === "quiz" ? { quizRevealed: false } : {}),
     });
@@ -78,8 +79,11 @@ export default function Deck() {
     if (!fbEnabled) return;
     return subscribeSession((s) => {
       if (!hasActivated.current) return;
-      const expected = slides[indexRef.current].interaction ?? null;
-      if (s.active !== expected) setSessionState({ active: expected });
+      const expectedSlide = slides[indexRef.current];
+      const expected = expectedSlide.interaction ?? null;
+      if (s.active !== expected || s.slideId !== expectedSlide.id) {
+        setSessionState({ slideId: expectedSlide.id, active: expected });
+      }
     });
   }, [slides]);
 

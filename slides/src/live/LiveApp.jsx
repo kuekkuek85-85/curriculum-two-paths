@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   fbEnabled,
   subscribeSession,
@@ -7,7 +7,11 @@ import {
 } from "../firebase.js";
 import { POLL_OPTIONS } from "../slides/intro.jsx";
 import { WISH_PROMPT } from "../slides/closing.jsx";
+import { buildSlides } from "../slides/index.jsx";
 import { QUIZ_OPTIONS, QUIZ_ANSWER_INDEX } from "../config.js";
+import { DeckContext, STAGE_W, STAGE_H } from "../deck/Deck.jsx";
+
+const ALL_SLIDES = buildSlides();
 
 export default function LiveApp() {
   const [session, setSession] = useState({});
@@ -34,8 +38,10 @@ export default function LiveApp() {
             <Quiz revealed={!!session.quizRevealed} />
           ) : session.active === "wish" ? (
             <Wish />
+          ) : session.slideId ? (
+            <SlideMirror slideId={session.slideId} />
           ) : (
-            <Waiting text="잠시 후 참여가 열립니다" />
+            <Waiting text="잠시 후 시작합니다" />
           )}
         </main>
       </div>
@@ -50,6 +56,57 @@ function Waiting({ text }) {
       <p className="mt-4 text-lg font-bold">{text}</p>
       <p className="mt-2 text-sm opacity-60">
         발표가 진행되면 이 화면이 자동으로 바뀝니다 — 화면을 켜 둔 채 기다려 주세요.
+      </p>
+    </div>
+  );
+}
+
+// 인터랙션이 없는 슬라이드는 강사 화면을 그대로 축소 미러링한다.
+function SlideMirror({ slideId }) {
+  const slide = ALL_SLIDES.find((s) => s.id === slideId);
+  const ref = useRef(null);
+  const [scale, setScale] = useState(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => setScale(el.clientWidth / STAGE_W);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    window.addEventListener("resize", update);
+    window.addEventListener("orientationchange", update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", update);
+      window.removeEventListener("orientationchange", update);
+    };
+  }, []);
+
+  if (!slide) return <Waiting text="화면을 불러오는 중…" />;
+  const Comp = slide.comp;
+
+  return (
+    <div>
+      <div
+        ref={ref}
+        className="w-full overflow-hidden rounded-[24px] shadow-lg"
+        style={{ aspectRatio: `${STAGE_W} / ${STAGE_H}` }}
+      >
+        {scale > 0 && (
+          <div
+            key={slide.id}
+            className="slide-enter origin-top-left"
+            style={{ width: STAGE_W, height: STAGE_H, transform: `scale(${scale})` }}
+          >
+            <DeckContext.Provider value={{ quizRevealed: false }}>
+              <Comp />
+            </DeckContext.Provider>
+          </div>
+        )}
+      </div>
+      <p className="t-caption mt-3 text-center opacity-50">
+        앞 화면과 동일합니다 · 참여가 열리면 자동으로 바뀝니다
       </p>
     </div>
   );

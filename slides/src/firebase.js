@@ -124,5 +124,5 @@ export async function resetAllResponses() {
     const snap = await getDocs(collection(db, coll));
     await Promise.all(snap.docs.map((d) => deleteDoc(d.ref)));
   }
-  await setDoc(doc(db, ...SESSION), { active: null, quizRevealed: false });
+  await setDoc(doc(db, ...SESSION), { active: null, quizRevealed: false }, { merge: true });
 }
