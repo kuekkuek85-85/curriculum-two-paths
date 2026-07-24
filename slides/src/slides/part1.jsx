@@ -261,21 +261,35 @@ export function S11() {
       <h2 className="t-display-lg mb-8" style={{ fontSize: 52 }}>
         교실에서 ② 팀원들의 타 교과 사례
       </h2>
-      <div className="grid flex-1 grid-cols-2 gap-6">
-        <Card className="flex flex-col">
+      <div className="grid min-h-0 flex-1 grid-cols-2 grid-rows-[minmax(0,1fr)] gap-6">
+        <Card className="flex min-h-0 flex-col">
           <div className="t-caption opacity-60">역사</div>
           <div className="t-headline mt-2">한국–인도네시아 국제공동수업</div>
-          <p className="t-body-lg mt-5">
+          <p className="t-body-lg mt-3">
             독립운동가 '양칠성=코마루딘'으로 잇는 공통의 역사, 실시간 번역 AI로 소통,
             공동 엠블럼 제작
           </p>
+          <div className="mt-4 flex min-h-0 flex-1 items-center justify-center">
+            <img
+              src="/img/korea-indonesia.png"
+              alt="한국–인도네시아 국제공동수업 활동 — Copilot 실시간 번역기로 학생 제작 엠블럼 발표"
+              className="max-h-full max-w-full rounded-[8px] object-contain"
+            />
+          </div>
         </Card>
-        <Card className="flex flex-col">
+        <Card className="flex min-h-0 flex-col">
           <div className="t-caption opacity-60">사회</div>
           <div className="t-headline mt-2">콩고민주공화국 온라인 액션</div>
-          <p className="t-body-lg mt-5">
+          <p className="t-body-lg mt-3">
             분쟁 자원 학습 후 국제 엠네스티 서명 참여, 캠페인 포스터를 자기 SNS에 게시
           </p>
+          <div className="mt-4 flex min-h-0 flex-1 items-center justify-center">
+            <img
+              src="/img/congo-action.png"
+              alt="콩고 온라인 액션 활동 — 온라인 캠페인 포스터 제작 및 캠페인 실천"
+              className="max-h-full max-w-full rounded-[8px] object-contain"
+            />
+          </div>
         </Card>
       </div>
       <BottomLine>정보 교과가 아니어도 굴러갑니다 — 이것이 범교과 설계의 힘</BottomLine>
