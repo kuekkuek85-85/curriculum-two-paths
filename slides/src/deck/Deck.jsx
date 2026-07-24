@@ -128,9 +128,15 @@ export default function Deck() {
         <div
           style={{ width: STAGE_W, height: STAGE_H, transform: `scale(${scale})` }}
           className="relative shrink-0 overflow-hidden bg-canvas text-ink shadow-2xl"
-          onClick={() => {
+          onClick={(e) => {
             setOverview(false);
-            setIndex((v) => Math.min(slides.length - 1, v + 1));
+            // 화면 왼쪽 절반 클릭 = 이전, 오른쪽 절반 클릭 = 다음
+            const rect = e.currentTarget.getBoundingClientRect();
+            if (e.clientX - rect.left < rect.width / 2) {
+              setIndex((v) => Math.max(0, v - 1));
+            } else {
+              setIndex((v) => Math.min(slides.length - 1, v + 1));
+            }
           }}
         >
           {/* 슬라이드 본문 */}
