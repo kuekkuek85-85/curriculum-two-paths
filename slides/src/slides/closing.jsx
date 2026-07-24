@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Slide, BottomLine, AutoQR, Pill, OfflineHint } from "./common.jsx";
 import { fbEnabled, subscribeWishes, hideWish } from "../firebase.js";
+import { useDeck } from "../deck/Deck.jsx";
 
 const FIN = "마무리";
 
@@ -50,10 +51,14 @@ export const WISH_PROMPT =
 
 // S19 — [인터랙션 ③] 실습 예고: 자유 입력 (라임 블록 — 청중 참여)
 export function S19() {
+  const staticMode = useDeck()?.staticMode;
   const [wishes, setWishes] = useState([]);
   const [failed, setFailed] = useState(false);
-  useEffect(() => subscribeWishes(setWishes, () => setFailed(true)), []);
-  const live = fbEnabled && !failed;
+  useEffect(() => {
+    if (staticMode) return;
+    return subscribeWishes(setWishes, () => setFailed(true));
+  }, [staticMode]);
+  const live = fbEnabled && !failed && !staticMode;
   const visible = wishes.filter((w) => !w.hidden);
 
   return (
@@ -76,26 +81,34 @@ export function S19() {
       <p className="t-headline mt-5 rounded-[24px] bg-canvas px-6 py-4">
         {WISH_PROMPT}
       </p>
-      {!live && <OfflineHint />}
-      <div className="mt-4 grid min-h-0 flex-1 auto-rows-min grid-cols-3 gap-3 overflow-hidden">
-        {visible.slice(0, 12).map((w) => (
-          <button
-            key={w.id}
-            onClick={(e) => {
-              e.stopPropagation();
-              hideWish(w.id);
-            }}
-            className="t-body-lg rounded-[24px] bg-canvas p-5 text-left leading-snug transition hover:ring-2 hover:ring-accent-magenta"
-          >
-            {w.text}
-          </button>
-        ))}
-        {live && visible.length === 0 && (
-          <div className="t-body-lg col-span-3 flex items-center justify-center opacity-50">
-            입력을 기다리는 중…
-          </div>
-        )}
-      </div>
+      {!live && !staticMode && <OfflineHint />}
+      {staticMode ? (
+        <div className="mt-4 flex min-h-0 flex-1 items-center justify-center rounded-[24px] bg-canvas">
+          <p className="t-headline text-center opacity-60">
+            발표 중 청중이 실시간으로 입력에 참여합니다
+          </p>
+        </div>
+      ) : (
+        <div className="mt-4 grid min-h-0 flex-1 auto-rows-min grid-cols-3 gap-3 overflow-hidden">
+          {visible.slice(0, 12).map((w) => (
+            <button
+              key={w.id}
+              onClick={(e) => {
+                e.stopPropagation();
+                hideWish(w.id);
+              }}
+              className="t-body-lg rounded-[24px] bg-canvas p-5 text-left leading-snug transition hover:ring-2 hover:ring-accent-magenta"
+            >
+              {w.text}
+            </button>
+          ))}
+          {live && visible.length === 0 && (
+            <div className="t-body-lg col-span-3 flex items-center justify-center opacity-50">
+              입력을 기다리는 중…
+            </div>
+          )}
+        </div>
+      )}
       <BottomLine>이 화면이 오늘 오후 실습의 예고편입니다.</BottomLine>
     </Slide>
   );
@@ -114,11 +127,9 @@ export function S20() {
         </div>
         <div className="flex w-[330px] shrink-0 flex-col items-center gap-5">
           <div className="rounded-[24px] bg-block-lime p-8">
-            <AutoQR path="" size={200} />
+            <AutoQR path="/slide" size={200} />
           </div>
-          <p className="t-body-lg text-center opacity-70">
-            슬라이드와 자료 링크는 여기서
-          </p>
+          <p className="t-body-lg text-center opacity-70">슬라이드 자료는 여기서</p>
         </div>
       </div>
     </Slide>

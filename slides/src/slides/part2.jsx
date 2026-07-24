@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Slide, BottomLine, Card, OfflineHint } from "./common.jsx";
 import { fbEnabled, subscribeCounts } from "../firebase.js";
+import { useDeck } from "../deck/Deck.jsx";
 import { WORKSHEET_CAPTURE, QUIZ_OPTIONS } from "../config.js";
 
 const P2 = "PART 2 · 가져다 쓴 사람의 이야기";
@@ -122,16 +123,16 @@ export function S14() {
 
 // S14-B — [인터랙션 ②] 실시간 설문 (핑크 블록, 정답 없음)
 export function S14B() {
+  const staticMode = useDeck()?.staticMode;
   const [counts, setCounts] = useState(QUIZ_OPTIONS.map(() => 0));
   const [failed, setFailed] = useState(false);
-  useEffect(
-    () =>
-      subscribeCounts("quiz", QUIZ_OPTIONS.length, setCounts, () =>
-        setFailed(true)
-      ),
-    []
-  );
-  const live = fbEnabled && !failed;
+  useEffect(() => {
+    if (staticMode) return;
+    return subscribeCounts("quiz", QUIZ_OPTIONS.length, setCounts, () =>
+      setFailed(true)
+    );
+  }, [staticMode]);
+  const live = fbEnabled && !failed && !staticMode;
   const total = counts.reduce((a, b) => a + b, 0);
   const max = Math.max(1, ...counts);
 
@@ -142,7 +143,11 @@ export function S14B() {
         <br />
         만드는 데 걸리는 시간은?
       </h2>
-      {live ? (
+      {staticMode ? (
+        <div className="t-caption mt-4 opacity-60">
+          발표 중 청중이 실시간으로 참여하는 설문입니다
+        </div>
+      ) : live ? (
         <div className="t-caption tabular mt-4 opacity-60">응답 {total}명</div>
       ) : (
         <OfflineHint />

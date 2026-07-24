@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Slide, BottomLine, Card, AutoQR, OfflineHint } from "./common.jsx";
 import { fbEnabled, subscribeCounts } from "../firebase.js";
+import { useDeck } from "../deck/Deck.jsx";
 
 // S1 — 타이틀 (대기 화면 겸용)
 export function S1() {
@@ -123,13 +124,14 @@ export const POLL_OPTIONS = [
 
 // S2-B — [인터랙션 ①] 실시간 폴 (청중 참여 = 라임 블록)
 export function S2B() {
+  const staticMode = useDeck()?.staticMode;
   const [counts, setCounts] = useState([0, 0, 0]);
   const [failed, setFailed] = useState(false);
-  useEffect(
-    () => subscribeCounts("poll", 3, setCounts, () => setFailed(true)),
-    []
-  );
-  const live = fbEnabled && !failed;
+  useEffect(() => {
+    if (staticMode) return;
+    return subscribeCounts("poll", 3, setCounts, () => setFailed(true));
+  }, [staticMode]);
+  const live = fbEnabled && !failed && !staticMode;
   const total = counts.reduce((a, b) => a + b, 0);
   const max = Math.max(1, ...counts);
 
@@ -138,7 +140,11 @@ export function S2B() {
       <h2 className="t-display-lg" style={{ fontSize: 52 }}>
         지금 개발 중인 내 과목, 완성되고 나면 — 지원자료는?
       </h2>
-      {live ? (
+      {staticMode ? (
+        <div className="t-caption mt-4 opacity-60">
+          발표 중 청중이 실시간으로 참여하는 설문입니다
+        </div>
+      ) : live ? (
         <div className="t-caption tabular mt-4 opacity-60">응답 {total}명</div>
       ) : (
         <OfflineHint />

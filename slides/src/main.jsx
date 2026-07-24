@@ -3,10 +3,12 @@ import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
 import Deck from "./deck/Deck.jsx";
+import StaticDeck from "./deck/StaticDeck.jsx";
 import LiveApp from "./live/LiveApp.jsx";
 
 const router = createBrowserRouter([
   { path: "/", element: <Deck /> },
+  { path: "/slide", element: <StaticDeck /> },
   { path: "/live", element: <LiveApp /> },
 ]);
 
