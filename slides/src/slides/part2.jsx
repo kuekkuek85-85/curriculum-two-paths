@@ -366,6 +366,9 @@ export function S17() {
           body="만든 학습지원자료 내용으로 학습지원 소프트웨어를 만들어 배포"
         >
           <LinkPill href="https://chatgpt.com/sites">chatgpt.com/sites</LinkPill>
+          <LinkPill href="https://middle-info-lesson3.kuekkuek85.chatgpt.site/">
+            산출물 예시
+          </LinkPill>
         </Step>
         <Step
           n="03"
