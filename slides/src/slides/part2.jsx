@@ -300,7 +300,7 @@ function DownloadPill({ href, name }) {
       href={href}
       download={name}
       onClick={(e) => e.stopPropagation()}
-      className="t-button inline-flex items-center gap-2 rounded-[50px] bg-ink px-5 py-2 text-inverse-ink transition hover:opacity-80"
+      className="inline-flex items-center gap-1.5 rounded-[50px] bg-ink px-3.5 py-1.5 text-[14px] font-medium text-inverse-ink transition hover:opacity-80"
     >
       ⬇ {name}
     </a>
@@ -314,80 +314,67 @@ function LinkPill({ href, children }) {
       target="_blank"
       rel="noreferrer"
       onClick={(e) => e.stopPropagation()}
-      className="t-button inline-flex items-center gap-2 rounded-[50px] bg-canvas px-5 py-2 ring-2 ring-ink transition hover:bg-ink hover:text-inverse-ink"
+      className="inline-flex items-center gap-1.5 rounded-[50px] bg-canvas px-3.5 py-1.5 text-[14px] font-medium ring-2 ring-ink transition hover:bg-ink hover:text-inverse-ink"
     >
       {children} ↗
     </a>
   );
 }
 
+function Step({ n, title, body, children }) {
+  return (
+    <div className="flex items-center gap-4 rounded-[18px] bg-surface-soft px-5 py-3">
+      <span className="text-[20px] font-bold tabular opacity-30">{n}</span>
+      <div className="min-w-0 flex-1">
+        <div className="text-[20px] font-bold leading-tight">{title}</div>
+        <p className="mt-0.5 text-[14px] opacity-70">{body}</p>
+      </div>
+      <div className="flex shrink-0 flex-wrap justify-end gap-2">{children}</div>
+    </div>
+  );
+}
+
 export function S17() {
   return (
     <Slide eyebrow={`${P2} · 제작 & 등록`}>
-      <h2 className="t-display-lg" style={{ fontSize: 44 }}>
+      <h2 className="t-display-lg" style={{ fontSize: 40 }}>
         학습지원 소프트웨어, 이렇게 만들고 등록합니다
       </h2>
-      <div className="mt-5 flex min-h-0 flex-1 flex-col justify-center gap-2.5">
-        <div className="flex items-start gap-5 rounded-[24px] bg-surface-soft p-4">
-          <span className="t-card-title tabular opacity-30">01</span>
-          <div className="flex-1">
-            <div className="t-headline">학습지원자료 템플릿을 생성형 AI로 채우기</div>
-            <p className="t-body mt-1 opacity-70">
-              빈 템플릿(hwpx)을 내려받아 교육과정을 컨텍스트로 넣고 차시별 내용을 AI로 완성
-            </p>
-            <div className="mt-3">
-              <DownloadPill
-                href="/files/학습지원자료-템플릿-예시.hwpx"
-                name="학습지원자료 템플릿 예시.hwpx"
-              />
-            </div>
-          </div>
-        </div>
-        <div className="flex items-start gap-5 rounded-[24px] bg-surface-soft p-4">
-          <span className="t-card-title tabular opacity-30">02</span>
-          <div className="flex-1">
-            <div className="t-headline">ChatGPT Sites로 바이브코딩 웹앱 제작·배포</div>
-            <p className="t-body mt-1 opacity-70">
-              만든 학습지원자료 내용으로 학습지원 소프트웨어를 만들어 배포
-            </p>
-            <div className="mt-3">
-              <LinkPill href="https://chatgpt.com/sites">chatgpt.com/sites</LinkPill>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-start gap-5 rounded-[24px] bg-surface-soft p-4">
-          <span className="t-card-title tabular opacity-30">03</span>
-          <div className="flex-1">
-            <div className="t-headline">등록 서류 자동 생성 (AI)</div>
-            <p className="t-body mt-1 opacity-70">
-              배포한 앱을 기준으로 개인정보 처리방침·체크리스트(hwpx)를 AI로 자동 작성
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <DownloadPill
-                href="/files/예시-개인정보처리방침.hwpx"
-                name="(예시) 개인정보 처리방침.hwpx"
-              />
-              <DownloadPill
-                href="/files/예시-체크리스트.hwpx"
-                name="(예시) 체크리스트.hwpx"
-              />
-            </div>
-          </div>
-        </div>
-        <div className="flex items-start gap-5 rounded-[24px] bg-surface-soft p-4">
-          <span className="t-card-title tabular opacity-30">04</span>
-          <div className="flex-1">
-            <div className="t-headline">edzip.kr 교사 로그인 → 등록</div>
-            <p className="t-body mt-1 opacity-70">
-              에듀집에 교사로 로그인해 학습지원 소프트웨어를 등록
-            </p>
-            <div className="mt-3">
-              <LinkPill href="https://edzip.kr/">edzip.kr</LinkPill>
-            </div>
-          </div>
-        </div>
+      <div className="mt-4 flex min-h-0 flex-1 flex-col justify-center gap-2.5">
+        <Step
+          n="01"
+          title="학습지원자료 템플릿을 생성형 AI로 채우기"
+          body="빈 템플릿(hwpx)에 교육과정을 컨텍스트로 넣어 차시별 내용을 AI로 완성"
+        >
+          <DownloadPill
+            href="/files/학습지원자료-템플릿-예시.hwpx"
+            name="템플릿 예시.hwpx"
+          />
+        </Step>
+        <Step
+          n="02"
+          title="ChatGPT Sites로 바이브코딩 웹앱 제작·배포"
+          body="만든 학습지원자료 내용으로 학습지원 소프트웨어를 만들어 배포"
+        >
+          <LinkPill href="https://chatgpt.com/sites">chatgpt.com/sites</LinkPill>
+        </Step>
+        <Step
+          n="03"
+          title="등록 서류 자동 생성 (AI)"
+          body="배포한 앱 기준으로 개인정보 처리방침·체크리스트를 AI로 자동 작성"
+        >
+          <DownloadPill href="/files/예시-개인정보처리방침.hwpx" name="개인정보 처리방침.hwpx" />
+          <DownloadPill href="/files/예시-체크리스트.hwpx" name="체크리스트.hwpx" />
+        </Step>
+        <Step
+          n="04"
+          title="edzip.kr 교사 로그인 → 등록"
+          body="에듀집에 교사로 로그인해 학습지원 소프트웨어를 등록"
+        >
+          <LinkPill href="https://edzip.kr/">edzip.kr</LinkPill>
+        </Step>
       </div>
-      <div className="t-body-sm mt-4 rounded-[16px] bg-surface-soft px-5 py-3 opacity-70">
+      <div className="mt-3 rounded-[14px] bg-surface-soft px-5 py-2.5 text-[13px] opacity-70">
         ※ 사업자 등록자가 아닌 교사 등 개인이 만든 학습지원 소프트웨어 체크리스트 등록
         문의: 한국교육학술정보원 교수학습지원부 (053-714-0357, 0308)
       </div>
