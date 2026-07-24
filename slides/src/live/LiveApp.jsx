@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   fbEnabled,
   subscribeSession,
@@ -18,6 +18,18 @@ export default function LiveApp() {
   const [failed, setFailed] = useState(false);
   useEffect(() => subscribeSession(setSession, () => setFailed(true)), []);
 
+  const offline = !fbEnabled || failed;
+  const isInteractive =
+    !offline &&
+    (session.active === "poll" ||
+      session.active === "quiz" ||
+      session.active === "wish");
+
+  // 인터랙션이 없는 정적 슬라이드는 강사 화면과 똑같이 전체 화면으로 미러링한다.
+  if (!offline && !isInteractive && session.slideId) {
+    return <FullScreenMirror slideId={session.slideId} />;
+  }
+
   return (
     <div className="min-h-full bg-canvas text-ink">
       <div className="mx-auto flex min-h-dvh w-full max-w-[640px] flex-col px-5 py-6">
@@ -30,7 +42,7 @@ export default function LiveApp() {
           </h1>
         </header>
         <main className="flex flex-1 flex-col justify-center pb-10">
-          {!fbEnabled || failed ? (
+          {offline ? (
             <Waiting text="참여 기능이 아직 열리지 않았습니다" />
           ) : session.active === "poll" ? (
             <Poll />
@@ -38,8 +50,6 @@ export default function LiveApp() {
             <Quiz revealed={!!session.quizRevealed} />
           ) : session.active === "wish" ? (
             <Wish />
-          ) : session.slideId ? (
-            <SlideMirror slideId={session.slideId} />
           ) : (
             <Waiting text="잠시 후 시작합니다" />
           )}
@@ -61,56 +71,44 @@ function Waiting({ text }) {
   );
 }
 
-// 인터랙션이 없는 슬라이드는 강사 화면을 그대로 축소 미러링한다.
-// aspect-ratio CSS에 기대지 않고, 측정한 너비로 높이를 직접 계산해 구형 웹뷰에서도 안전하게 맞춘다.
-function SlideMirror({ slideId }) {
+// 인터랙션이 없는 슬라이드는 강사 화면과 동일하게 전체 화면으로 미러링한다.
+// Deck.jsx의 16:9 레터박싱과 동일한 방식(뷰포트 너비/높이 중 작은 비율)으로 스케일을 계산한다.
+function FullScreenMirror({ slideId }) {
   const slide = ALL_SLIDES.find((s) => s.id === slideId);
-  const ref = useRef(null);
-  const [width, setWidth] = useState(0);
+  const [scale, setScale] = useState(0);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const update = () => setWidth(el.clientWidth);
+    const update = () =>
+      setScale(Math.min(window.innerWidth / STAGE_W, window.innerHeight / STAGE_H));
     update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
     window.addEventListener("resize", update);
     window.addEventListener("orientationchange", update);
     return () => {
-      ro.disconnect();
       window.removeEventListener("resize", update);
       window.removeEventListener("orientationchange", update);
     };
   }, []);
 
-  if (!slide) return <Waiting text="화면을 불러오는 중…" />;
+  if (!slide) return null;
   const Comp = slide.comp;
-  const scale = width / STAGE_W;
-  const height = width * (STAGE_H / STAGE_W);
 
   return (
-    <div>
-      <div
-        ref={ref}
-        className="w-full overflow-hidden rounded-[24px] shadow-lg"
-        style={{ height: width > 0 ? height : 0 }}
-      >
-        {width > 0 && (
-          <div
-            key={slide.id}
-            className="slide-enter origin-top-left"
-            style={{ width: STAGE_W, height: STAGE_H, transform: `scale(${scale})` }}
-          >
+    <div className="fixed inset-0 flex items-center justify-center overflow-hidden bg-[#15181f]">
+      {scale > 0 && (
+        <div
+          style={{ width: STAGE_W, height: STAGE_H, transform: `scale(${scale})` }}
+          className="relative shrink-0 overflow-hidden bg-canvas text-ink shadow-2xl"
+        >
+          <div key={slide.id} className="slide-enter absolute inset-0">
             <DeckContext.Provider value={{ quizRevealed: false }}>
               <Comp />
             </DeckContext.Provider>
           </div>
-        )}
+        </div>
+      )}
+      <div className="absolute bottom-3 right-3 rounded-[50px] bg-black/40 px-3 py-1 text-[11px] text-white/70">
+        앞 화면과 동일 · 참여 시 자동 전환
       </div>
-      <p className="t-caption mt-3 text-center opacity-50">
-        앞 화면과 동일합니다 · 참여가 열리면 자동으로 바뀝니다
-      </p>
     </div>
   );
 }
