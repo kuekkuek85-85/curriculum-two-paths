@@ -22,36 +22,33 @@ npm run dev
 | R | S14-B 퀴즈 정답 공개 |
 | Esc | 오버뷰 닫기 / 점프 입력 취소 |
 
-## 1) Firebase 설정 (실시간 인터랙션용 — 약 5분)
+## 1) Firebase — 보안 규칙 적용 (**필수, 30초**)
 
-Firebase 미설정이어도 슬라이드는 완전 동작합니다(인터랙션 슬라이드에 "거수로 진행" 안내 표시).
+Firebase 프로젝트(`curriculum-two-paths`)는 이미 연결되어 있습니다. 다만 Firestore가
+**잠금 모드**로 생성되어 있어 규칙을 열기 전에는 실시간 인터랙션이 동작하지 않습니다
+(이 상태에서도 슬라이드는 정상 진행되며 "거수로 진행" 안내만 표시됩니다).
 
-1. https://console.firebase.google.com → **프로젝트 추가** (이름 자유, Google 애널리틱스 **끄기**)
-2. 왼쪽 **빌드 > Firestore Database → 데이터베이스 만들기** → 위치 `asia-northeast3 (서울)` → **테스트 모드로 시작** (30일간 열림 — 연수용으로 충분)
-3. **프로젝트 개요 ⚙ > 프로젝트 설정 > 내 앱 > 웹(`</>`) 앱 추가** → 등록 → 표시되는 `firebaseConfig`에서 4개 값 복사
-4. `slides/.env.example`을 `slides/.env.local`로 복사하고 값 채우기:
+1. https://console.firebase.google.com → `curriculum-two-paths` → **Firestore Database → 규칙** 탭
+2. 편집기 내용을 이 저장소의 [`firestore.rules`](firestore.rules) 파일 내용으로 통째로 교체
+3. **게시** 클릭
 
-```
-VITE_FIREBASE_API_KEY=AIza...
-VITE_FIREBASE_AUTH_DOMAIN=xxx.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=xxx
-VITE_FIREBASE_APP_ID=1:123:web:abc
-```
+규칙은 앱이 쓰는 4개 경로(`session`, `responses_poll`, `responses_quiz`, `wishes`)만 열고
+2026-08-31 이후 자동으로 닫히도록 되어 있습니다.
 
-5. dev 서버 재시작(`npm run dev`) → 슬라이드 3번(S2-B)으로 이동 → 다른 기기/탭에서 `/live` 접속해 1표 테스트
+> Firebase 웹 config 값은 비밀키가 아니라 클라이언트 번들에 그대로 실리는 공개 식별자이므로
+> `src/firebase.js`에 기본값으로 커밋되어 있습니다. 실제 보호는 위 보안 규칙이 담당합니다.
+> 다른 프로젝트로 바꾸려면 `.env.local`에 `VITE_FIREBASE_*`를 넣으면 그쪽이 우선합니다.
 
-## 2) Vercel 배포
+## 2) Vercel 배포 (GitHub 연동 자동 배포)
 
-```bash
-cd slides
-npm i -g vercel
-vercel login
-vercel --prod
-```
+저장소: https://github.com/kuekkuek85-85/curriculum-two-paths — **main 브랜치에 푸시하면 자동 배포**됩니다.
 
-- 프레임워크는 Vite로 자동 인식되고, `/live` 라우팅용 `vercel.json`이 이미 포함되어 있습니다.
-- **환경변수**: Vercel 대시보드 → 프로젝트 → Settings → Environment Variables에 위 4개 `VITE_FIREBASE_*` 값을 등록 후 **재배포** (또는 `vercel env add`로 등록).
-- QR 코드는 배포된 주소를 자동으로 사용하므로 별도 설정이 필요 없습니다. 고정하려면 `src/config.js`의 `DEPLOY_URL`에 입력.
+Vercel에서 처음 Import할 때 한 가지만 주의하세요:
+
+- **Root Directory를 `slides`로 지정** (앱 코드가 하위 폴더에 있습니다)
+- 프레임워크는 Vite로 자동 인식되고, `/live` 라우팅용 `vercel.json`이 포함되어 있습니다
+- 환경변수 등록은 필요 없습니다 (Firebase config가 코드에 기본값으로 있음)
+- QR 코드는 배포된 주소를 자동으로 사용합니다. 고정하려면 `src/config.js`의 `DEPLOY_URL`에 입력
 
 ## 3) 발표 직전에 채울 값 — `src/config.js`
 
