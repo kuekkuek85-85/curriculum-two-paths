@@ -1,0 +1,85 @@
+@import "tailwindcss";
+@import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
+
+@theme {
+  --color-paper: #fafaf7;
+  --color-ink: #1a2332;
+  --color-seal: #0f6b4f;
+  --color-stamp: #c0392b;
+  --color-line: #d8d6ce;
+  --color-dim: #6b7280;
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, "Segoe UI",
+    "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #15181f;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 슬라이드 전환: 절제된 페이드+슬라이드 하나 (250ms 이내) */
+.slide-enter {
+  animation: slide-in 240ms ease-out both;
+}
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(22px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 요소 순차 등장 (S15 파이프라인 전용) */
+.stagger > * {
+  animation: rise-in 360ms ease-out both;
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* '적합' 도장 (S7 전용) */
+.stamp-seal {
+  display: inline-block;
+  border: 5px solid var(--color-stamp);
+  color: var(--color-stamp);
+  border-radius: 10px;
+  padding: 0.15em 0.4em;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  transform: rotate(-7deg);
+  box-shadow: 0 0 0 2px rgba(192, 57, 43, 0.15);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide-enter,
+  .stagger > * {
+    animation: none !important;
+  }
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-seal);
+  outline-offset: 2px;
+}
