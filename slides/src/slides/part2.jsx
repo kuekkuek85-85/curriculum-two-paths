@@ -369,13 +369,10 @@ export function S17() {
         <Step
           n="04"
           title="edzip.kr 에 등록"
-          body="에듀집에 교사로 로그인해 학습지원 소프트웨어를 등록"
+          body="등록 문의: 한국교육학술정보원 교수학습지원부 (053-714-0357, 0308)"
         >
           <LinkPill href="https://edzip.kr/">edzip.kr</LinkPill>
         </Step>
-      </div>
-      <div className="mt-3 rounded-[14px] bg-surface-soft px-5 py-2.5 text-[13px] opacity-70">
-        등록 문의: 한국교육학술정보원 교수학습지원부 (053-714-0357, 0308)
       </div>
     </Slide>
   );
