@@ -1,10 +1,10 @@
-// HWPX(zip 패키지) 클라이언트 처리 — unzip → 텍스트 추출 → 메모 문단 삽입 → 재패킹
-// 별도 서버 없이 브라우저에서 처리하고, 원문은 절대 수정하지 않고 메모만 삽입한다.
+// HWPX(zip 패키지) 클라이언트 처리 — unzip → 텍스트 추출 → '한글 메모'(MEMO 필드) 삽입 → 재패킹
+// 원문은 절대 수정하지 않고, 소제목 텍스트에 실제 한글 메모(주석)를 달아 준다.
 import JSZip from "jszip";
 
 const SECTION_PATH = "Contents/section0.xml";
 
-// 점검 대상 소제목(정규식 매칭용)
+// 점검 대상 소제목
 export const SUBHEADS = [
   "성격",
   "목표",
@@ -34,23 +34,20 @@ function escapeXml(s) {
     .replace(/"/g, "&quot;");
 }
 
-// 한 문단(<hp:p>) 내 모든 <hp:t> 런의 텍스트를 이어붙인다
 function paragraphText(pBlock) {
   const runs = pBlock.match(/<hp:t>([\s\S]*?)<\/hp:t>/g) || [];
   return runs
     .map((r) => r.replace(/^<hp:t>/, "").replace(/<\/hp:t>$/, ""))
-    .map((r) => r.replace(/<[^>]+>/g, "")) // 런 내부 마크업 제거
+    .map((r) => r.replace(/<[^>]+>/g, ""))
     .map(decodeEntities)
     .join("");
 }
 
-// section0.xml → 문단 배열(순서 유지)
 function extractParagraphs(sectionXml) {
   const blocks = sectionXml.match(/<hp:p\b[\s\S]*?<\/hp:p>/g) || [];
   return blocks.map(paragraphText);
 }
 
-// 평문 전체 텍스트
 export function plainText(sectionXml) {
   return extractParagraphs(sectionXml)
     .map((t) => t.trim())
@@ -58,7 +55,6 @@ export function plainText(sectionXml) {
     .join("\n");
 }
 
-// HWPX 파일(ArrayBuffer) 로드 → { zip, sectionXml, text }
 export async function parseHwpx(arrayBuffer) {
   const zip = await JSZip.loadAsync(arrayBuffer);
   const secFile = zip.file(SECTION_PATH);
@@ -73,77 +69,202 @@ export async function parseHwpx(arrayBuffer) {
   return { zip, sectionXml, text };
 }
 
-// 기존 문단/런의 스타일 참조를 가져와 메모 문단 템플릿을 만든다
+// 기존 문단/런의 스타일 참조(메모 내부 문단이 유효한 ID를 참조하도록)
 function styleRefs(sectionXml) {
   const p = sectionXml.match(/<hp:p\b([^>]*)>/);
   const run = sectionXml.match(/<hp:run\b([^>]*)>/);
   const attr = (s, name) => {
-    const m = s && s.match(new RegExp(`${name}="([^"]*)"`));
-    return m ? m[1] : "0";
+    const mm = s && s.match(new RegExp(`${name}="([^"]*)"`));
+    return mm ? mm[1] : "0";
   };
   return {
     paraPr: attr(p && p[1], "paraPrIDRef"),
-    style: attr(p && p[1], "styleIDRef"),
     charPr: attr(run && run[1], "charPrIDRef"),
   };
 }
 
-function memoParagraph(id, refs, text) {
+// MEMO 필드(fieldBegin) — 메모 내용을 subList 문단으로 담는다
+function memoFieldXml({ beginId, fieldId, number, author, dateTime, lines, refs }) {
+  const params =
+    `<hp:parameters cnt="7" name="">` +
+    `<hp:integerParam name="Prop">0</hp:integerParam>` +
+    `<hp:stringParam name="Command">MEMO/65535/${number}/2679222272/31267793/${escapeXml(author)}/\\;;</hp:stringParam>` +
+    `<hp:stringParam name="ID">memo${number}</hp:stringParam>` +
+    `<hp:integerParam name="Number">${number}</hp:integerParam>` +
+    `<hp:stringParam name="Author">${escapeXml(author)}</hp:stringParam>` +
+    `<hp:stringParam name="MemoShapeIDRef">65535</hp:stringParam>` +
+    `<hp:stringParam name="CreateDateTime">${dateTime}</hp:stringParam>` +
+    `</hp:parameters>`;
+  const paras = lines
+    .map(
+      (t) =>
+        `<hp:p id="0" paraPrIDRef="${refs.paraPr}" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0">` +
+        `<hp:run charPrIDRef="${refs.charPr}"><hp:t>${escapeXml(t)}</hp:t></hp:run></hp:p>`
+    )
+    .join("");
+  const sub =
+    `<hp:subList id="" textDirection="HORIZONTAL" lineWrap="BREAK" vertAlign="TOP" linkListIDRef="0" linkListNextIDRef="0" textWidth="0" textHeight="0" hasTextRef="0" hasNumRef="0">` +
+    paras +
+    `</hp:subList>`;
   return (
-    `<hp:p id="${id}" paraPrIDRef="${refs.paraPr}" styleIDRef="${refs.style}" pageBreak="0" columnBreak="0" merged="0">` +
-    `<hp:run charPrIDRef="${refs.charPr}"><hp:t>${escapeXml(text)}</hp:t></hp:run>` +
-    `</hp:p>`
+    `<hp:ctrl><hp:fieldBegin id="${beginId}" type="MEMO" name="" editable="1" dirty="1" zorder="${number}" fieldid="${fieldId}">` +
+    params +
+    sub +
+    `</hp:fieldBegin></hp:ctrl>`
   );
 }
 
-// 이슈 목록 → 메모 문단들을 본문 맨 앞에 삽입하고 재패킹한 Blob 반환
-// (원문은 그대로 두고, 문서 앞에 '💬 AI 점검 메모' 블록을 얹는다)
-export async function buildAnnotated({ zip, sectionXml, sections }) {
-  const refs = styleRefs(sectionXml);
-  let id = 2000000000;
-  const memos = [];
-  memos.push(memoParagraph(id++, refs, "━━━━━ 💬 AI 점검 메모 (참고용 · 최종 판단은 본인/강사) ━━━━━"));
-  for (const s of sections) {
-    if (!s.issues || !s.issues.length) continue;
-    memos.push(memoParagraph(id++, refs, `▸ ${s.title}`));
-    for (const it of s.issues) {
-      const line = `💬 [AI 점검] ${it.point ? it.point + " → " : ""}${it.ask}`;
-      memos.push(memoParagraph(id++, refs, line));
-      if (it.basis) {
-        memos.push(memoParagraph(id++, refs, `   └ 근거: ${it.basis}`));
-      }
+// 단순 텍스트 런(<hp:run ..><hp:t>텍스트</hp:t></hp:run>) 목록
+function collectSimpleRuns(xml) {
+  const re = /<hp:run\b([^>]*)>(<hp:t>)([\s\S]*?)(<\/hp:t>)<\/hp:run>/g;
+  const out = [];
+  let m;
+  while ((m = re.exec(xml))) {
+    out.push({
+      start: m.index,
+      end: m.index + m[0].length,
+      attrs: m[1],
+      encText: m[3],
+      decText: decodeEntities(m[3]),
+    });
+  }
+  return out;
+}
+
+const norm = (s) => (s || "").replace(/[\s·]/g, "");
+
+// 소제목에 가장 잘 맞는 앵커 런 인덱스(사용된 런 제외)
+function findHeadingRun(runs, title, used) {
+  const nt = norm(title);
+  if (!nt) return -1;
+  let best = -1;
+  let bestScore = Infinity;
+  runs.forEach((r, i) => {
+    if (used.has(i)) return;
+    const t = r.decText.trim();
+    if (!t) return;
+    const nr = norm(t);
+    let score;
+    // 같은 유형이면 더 짧은(헤딩에 가까운) 런을 우선하도록 길이를 소수점 가중
+    if (nr === nt) score = 0 + t.length * 0.001;
+    else if (nr.startsWith(nt)) score = 1 + t.length * 0.001;
+    else if (nr.includes(nt) && t.length <= title.length + 10) score = 2 + t.length * 0.001;
+    else return;
+    if (score < bestScore) {
+      bestScore = score;
+      best = i;
     }
-  }
-  memos.push(memoParagraph(id++, refs, "━━━━━ (여기까지 AI 점검 메모) ━━━━━"));
+  });
+  return best;
+}
 
-  // 첫 <hp:p> 앞에 메모 블록 삽입
-  const firstP = sectionXml.search(/<hp:p\b/);
-  let newXml;
-  if (firstP >= 0) {
-    newXml =
-      sectionXml.slice(0, firstP) + memos.join("") + sectionXml.slice(firstP);
-  } else {
-    // 문단을 못 찾으면 그대로 반환(폴백에서 처리)
-    newXml = sectionXml;
-  }
+function firstNonEmptyRun(runs, used) {
+  return runs.findIndex((r, i) => !used.has(i) && r.decText.trim().length >= 1);
+}
 
-  zip.file(SECTION_PATH, newXml);
+function removeLineSegArrays(xml) {
+  return xml
+    .replace(/<hp:linesegarray\b[^>]*\/>/g, "")
+    .replace(/<hp:linesegarray\b[\s\S]*?<\/hp:linesegarray>/g, "");
+}
 
-  // OCF 규칙: mimetype은 압축 없이 맨 앞. 제자리 갱신으로 무압축 보장(순서 유지)
+async function repack(zip) {
   const mimeFile = zip.file("mimetype");
   if (mimeFile) {
     const mime = await mimeFile.async("string");
     zip.file("mimetype", mime, { compression: "STORE" });
   }
-
-  const blob = await zip.generateAsync({
-    type: "blob",
-    mimeType: "application/hwp+zip",
-  });
-  return blob;
+  return zip.generateAsync({ type: "blob", mimeType: "application/hwp+zip" });
 }
 
-// 파일명에 _AI메모 접미사
+// 폴백: 소제목 앵커를 못 찾으면 문서 맨 앞에 메모 문단 블록을 얹는다(옛 방식)
+async function legacyAnnotate({ zip, sectionXml, sections }) {
+  const refs = styleRefs(sectionXml);
+  let id = 2000000000;
+  const memoP = (text) =>
+    `<hp:p id="${id++}" paraPrIDRef="${refs.paraPr}" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0">` +
+    `<hp:run charPrIDRef="${refs.charPr}"><hp:t>${escapeXml(text)}</hp:t></hp:run></hp:p>`;
+  const blocks = [memoP("━━ 💬 AI 점검 메모 (참고용) ━━")];
+  for (const s of sections) {
+    if (!s.issues || !s.issues.length) continue;
+    blocks.push(memoP(`▸ ${s.title}`));
+    for (const it of s.issues) {
+      blocks.push(memoP(`💬 ${it.point ? it.point + " → " : ""}${it.ask}`));
+      if (it.basis) blocks.push(memoP(`   └ 근거: ${it.basis}`));
+    }
+  }
+  const firstP = sectionXml.search(/<hp:p\b/);
+  const newXml =
+    firstP >= 0
+      ? sectionXml.slice(0, firstP) + blocks.join("") + sectionXml.slice(firstP)
+      : sectionXml;
+  zip.file(SECTION_PATH, removeLineSegArrays(newXml));
+  return repack(zip);
+}
+
+// 이슈 목록 → 소제목마다 실제 한글 메모(MEMO 필드)를 달아 재패킹한 Blob 반환
+export async function buildAnnotated({ zip, sectionXml, sections }) {
+  const refs = styleRefs(sectionXml);
+  const author = "AI 점검";
+  const dateTime = new Date().toISOString().replace(/\.\d+Z$/, "Z");
+
+  const runs = collectSimpleRuns(sectionXml);
+  const used = new Set();
+  const plan = [];
+  let number = 0;
+
+  for (const sec of sections) {
+    if (!sec.issues || !sec.issues.length) continue;
+    let idx = findHeadingRun(runs, sec.title, used);
+    if (idx < 0) idx = firstNonEmptyRun(runs, used);
+    if (idx < 0) continue;
+    used.add(idx);
+    number += 1;
+    const lines = [];
+    for (const it of sec.issues) {
+      lines.push(`💬 ${it.point ? it.point + " — " : ""}${it.ask}`);
+      if (it.basis) lines.push(`근거: ${it.basis}`);
+    }
+    plan.push({ runIndex: idx, lines, number });
+  }
+
+  if (plan.length === 0) {
+    return legacyAnnotate({ zip, sectionXml, sections });
+  }
+
+  // 뒤에서부터 치환(문자열 인덱스 보존)
+  plan.sort((a, b) => runs[b.runIndex].start - runs[a.runIndex].start);
+  let xml = sectionXml;
+  let beginId = 2100000000;
+  let fieldId = 620000000;
+  for (const p of plan) {
+    const r = runs[p.runIndex];
+    const bId = beginId++;
+    const fId = fieldId++;
+    const field = memoFieldXml({
+      beginId: bId,
+      fieldId: fId,
+      number: p.number,
+      author,
+      dateTime,
+      lines: p.lines,
+      refs,
+    });
+    const fieldEnd = `<hp:ctrl><hp:fieldEnd beginIDRef="${bId}" fieldid="${fId}"/></hp:ctrl>`;
+    const newRun =
+      `<hp:run${r.attrs}>` +
+      field +
+      `<hp:t>${r.encText}</hp:t>` +
+      fieldEnd +
+      `<hp:t/></hp:run>`;
+    xml = xml.slice(0, r.start) + newRun + xml.slice(r.end);
+  }
+
+  xml = removeLineSegArrays(xml);
+  zip.file(SECTION_PATH, xml);
+  return repack(zip);
+}
+
 export function annotatedName(original) {
   const base = original.replace(/\.hwpx$/i, "");
   return `${base}_AI메모.hwpx`;
