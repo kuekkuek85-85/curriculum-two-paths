@@ -70,7 +70,7 @@ export default function DiffApp() {
     setResult(null);
     try {
       setStatus("extracting");
-      const mine = await extractDoc(mineFile, { allowPdf: false });
+      const mine = await extractDoc(mineFile, { allowPdf: true });
       const other = await extractDoc(otherFile, { allowPdf: true });
 
       setStatus("comparing");
@@ -126,9 +126,9 @@ export default function DiffApp() {
         {/* 업로드 2단 */}
         <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
           <UploadBox
-            label="내 교육과정 초안 (HWPX)"
-            hint=".hwpx"
-            accept=".hwpx"
+            label="내 교육과정 초안 (HWPX/PDF)"
+            hint=".hwpx 또는 .pdf"
+            accept=".hwpx,.pdf"
             file={mineFile}
             onPick={(f) => f && setMineFile(f)}
           />
