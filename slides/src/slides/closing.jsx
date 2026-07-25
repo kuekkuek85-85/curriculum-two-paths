@@ -136,6 +136,18 @@ export function S20() {
           <p className="t-body-sm mt-3 opacity-50">
             HWPX 초안을 올리면 교안 기준으로 점검 메모를 달아 드립니다
           </p>
+          <a
+            href="/diff"
+            target="_blank"
+            rel="noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="t-button mt-5 inline-flex items-center gap-2 rounded-[50px] bg-block-mint px-7 py-3.5 text-ink transition hover:opacity-90"
+          >
+            🔍 교육과정 차별성 비교분석기 열기 →
+          </a>
+          <p className="t-body-sm mt-3 opacity-50">
+            내 초안과 기존 교육과정을 비교해 차별화 전략을 Excel로 드립니다
+          </p>
         </div>
         <div className="flex w-[330px] shrink-0 flex-col items-center gap-5">
           <div className="rounded-[24px] bg-block-lime p-8">

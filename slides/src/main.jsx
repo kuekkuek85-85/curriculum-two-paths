@@ -6,12 +6,14 @@ import Deck from "./deck/Deck.jsx";
 import StaticDeck from "./deck/StaticDeck.jsx";
 import LiveApp from "./live/LiveApp.jsx";
 import HwpxChecker from "./hwpx/HwpxChecker.jsx";
+import DiffApp from "./diff/DiffApp.jsx";
 
 const router = createBrowserRouter([
   { path: "/", element: <Deck /> },
   { path: "/slide", element: <StaticDeck /> },
   { path: "/live", element: <LiveApp /> },
   { path: "/hwpx", element: <HwpxChecker /> },
+  { path: "/diff", element: <DiffApp /> },
 ]);
 
 createRoot(document.getElementById("root")).render(
