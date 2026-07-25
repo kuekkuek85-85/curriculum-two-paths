@@ -3,6 +3,8 @@
 import JSZip from "jszip";
 
 const SECTION_PATH = "Contents/section0.xml";
+const HEADER_PATH = "Contents/header.xml";
+const MEMO_PT = 8; // 메모 글자 크기(pt)
 
 // 점검 대상 소제목
 export const SUBHEADS = [
@@ -84,7 +86,8 @@ function styleRefs(sectionXml) {
 }
 
 // MEMO 필드(fieldBegin) — 메모 내용을 subList 문단으로 담는다
-function memoFieldXml({ beginId, fieldId, number, author, dateTime, lines, refs }) {
+function memoFieldXml({ beginId, fieldId, number, author, dateTime, lines, refs, memoCharPr }) {
+  const contentCharPr = memoCharPr != null ? memoCharPr : refs.charPr;
   const params =
     `<hp:parameters cnt="7" name="">` +
     `<hp:integerParam name="Prop">0</hp:integerParam>` +
@@ -99,7 +102,7 @@ function memoFieldXml({ beginId, fieldId, number, author, dateTime, lines, refs 
     .map(
       (t) =>
         `<hp:p id="0" paraPrIDRef="${refs.paraPr}" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0">` +
-        `<hp:run charPrIDRef="${refs.charPr}"><hp:t>${escapeXml(t)}</hp:t></hp:run></hp:p>`
+        `<hp:run charPrIDRef="${contentCharPr}"><hp:t>${escapeXml(t)}</hp:t></hp:run></hp:p>`
     )
     .join("");
   const sub =
@@ -168,6 +171,53 @@ function removeLineSegArrays(xml) {
     .replace(/<hp:linesegarray\b[\s\S]*?<\/hp:linesegarray>/g, "");
 }
 
+// header.xml에 메모용 charPr(8pt)을 추가하고 그 새 id를 돌려준다.
+// 기존 charPr을 복제해 height만 800(8pt)으로 바꿔 유효성을 보장한다.
+async function ensureMemoCharPr(zip) {
+  const hFile = zip.file(HEADER_PATH);
+  if (!hFile) return null;
+  let header = await hFile.async("string");
+  const listM = header.match(/<hh:charProperties\b[^>]*itemCnt="(\d+)"[^>]*>/);
+  if (!listM) return null;
+  const itemCnt = parseInt(listM[1], 10);
+  const ids = [...header.matchAll(/<hh:charPr\b[^>]*\bid="(\d+)"/g)].map((m) =>
+    parseInt(m[1], 10)
+  );
+  const newId = (ids.length ? Math.max(...ids) : 0) + 1;
+  const height = String(MEMO_PT * 100); // 8pt → 800
+
+  const tplM = header.match(/<hh:charPr\b[\s\S]*?<\/hh:charPr>/);
+  let newCharPr;
+  if (tplM) {
+    newCharPr = tplM[0]
+      .replace(/\bid="\d+"/, `id="${newId}"`)
+      .replace(/\bheight="\d+"/, `height="${height}"`);
+    if (!new RegExp(`height="${height}"`).test(newCharPr)) {
+      newCharPr = newCharPr.replace(/<hh:charPr\b/, `<hh:charPr height="${height}"`);
+    }
+  } else {
+    newCharPr =
+      `<hh:charPr id="${newId}" height="${height}" textColor="#000000" shadeColor="none" useFontSpace="0" useKerning="0" symMark="NONE" borderFillIDRef="2">` +
+      `<hh:fontRef hangul="0" latin="0" hanja="0" japanese="0" other="0" symbol="0" user="0"/>` +
+      `<hh:ratio hangul="100" latin="100" hanja="100" japanese="100" other="100" symbol="100" user="100"/>` +
+      `<hh:spacing hangul="0" latin="0" hanja="0" japanese="0" other="0" symbol="0" user="0"/>` +
+      `<hh:relSz hangul="100" latin="100" hanja="100" japanese="100" other="100" symbol="100" user="100"/>` +
+      `<hh:offset hangul="0" latin="0" hanja="0" japanese="0" other="0" symbol="0" user="0"/>` +
+      `</hh:charPr>`;
+  }
+
+  header = header.replace(
+    /(<hh:charProperties\b[^>]*itemCnt=")\d+(")/,
+    `$1${itemCnt + 1}$2`
+  );
+  header = header.replace(
+    /<\/hh:charProperties>/,
+    newCharPr + `</hh:charProperties>`
+  );
+  zip.file(HEADER_PATH, header);
+  return newId;
+}
+
 async function repack(zip) {
   const mimeFile = zip.file("mimetype");
   if (mimeFile) {
@@ -207,6 +257,8 @@ export async function buildAnnotated({ zip, sectionXml, sections }) {
   const refs = styleRefs(sectionXml);
   const author = "AI 점검";
   const dateTime = new Date().toISOString().replace(/\.\d+Z$/, "Z");
+  // 메모 글자용 8pt charPr을 header.xml에 추가
+  const memoCharPr = await ensureMemoCharPr(zip);
 
   const runs = collectSimpleRuns(sectionXml);
   const used = new Set();
@@ -223,6 +275,7 @@ export async function buildAnnotated({ zip, sectionXml, sections }) {
     const lines = [];
     for (const it of sec.issues) {
       lines.push(`💬 ${it.point ? it.point + " — " : ""}${it.ask}`);
+      if (it.suggest) lines.push(`제안: ${it.suggest}`);
       if (it.basis) lines.push(`근거: ${it.basis}`);
     }
     plan.push({ runIndex: idx, lines, number });
@@ -249,6 +302,7 @@ export async function buildAnnotated({ zip, sectionXml, sections }) {
       dateTime,
       lines: p.lines,
       refs,
+      memoCharPr,
     });
     const fieldEnd = `<hp:ctrl><hp:fieldEnd beginIDRef="${bId}" fieldid="${fId}"/></hp:ctrl>`;
     const newRun =

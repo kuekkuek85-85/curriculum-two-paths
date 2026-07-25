@@ -268,6 +268,11 @@ export default function HwpxChecker() {
                             </div>
                           )}
                           <div className="t-body-lg mt-1">💬 {it.ask}</div>
+                          {it.suggest && (
+                            <div className="t-body mt-2 rounded-[10px] bg-block-lime/40 px-3 py-2">
+                              ✏️ 제안: {it.suggest}
+                            </div>
+                          )}
                           {it.basis && (
                             <div className="t-body-sm mt-2 opacity-60">
                               └ 근거: {it.basis}
